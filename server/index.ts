@@ -59,6 +59,13 @@ function setupBodyParsing(app: express.Application) {
   app.use(express.urlencoded({ extended: false }));
 }
 
+function setupStaticFiles(app: express.Application) {
+  const publicPath = path.resolve(process.cwd(), "public");
+  if (fs.existsSync(publicPath)) {
+    app.use(express.static(publicPath, { maxAge: "1d" }));
+  }
+}
+
 function setupRequestLogging(app: express.Application) {
   app.use((req, res, next) => {
     const start = Date.now();
@@ -220,6 +227,7 @@ function setupErrorHandler(app: express.Application) {
   setupCors(app);
   setupBodyParsing(app);
   setupRequestLogging(app);
+  setupStaticFiles(app);
 
   configureExpoAndLanding(app);
 

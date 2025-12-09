@@ -3,6 +3,7 @@ import { View, StyleSheet, Dimensions, Platform } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { getApiUrl } from "@/lib/query-client";
 
 const FEATURED_VIDEOS = [
   {
@@ -10,7 +11,7 @@ const FEATURED_VIDEOS = [
     title: "Full Exterior Detail",
     subtitle: "Premium Red Ferrari",
     description: "Complete wash, polish & protection",
-    videoUrl: "/videos/red_luxury_sports_car_being_detailed.mp4",
+    videoPath: "/videos/red_luxury_sports_car_being_detailed.mp4",
     accent: "#FF6B6B",
   },
   {
@@ -18,7 +19,7 @@ const FEATURED_VIDEOS = [
     title: "Ceramic Coating",
     subtitle: "Luxury Black Mercedes",
     description: "Premium paint protection",
-    videoUrl: "/videos/black_luxury_car_ceramic_coating.mp4",
+    videoPath: "/videos/black_luxury_car_ceramic_coating.mp4",
     accent: "#4ECDC4",
   },
   {
@@ -26,7 +27,7 @@ const FEATURED_VIDEOS = [
     title: "Interior Detailing",
     subtitle: "Premium White Tesla",
     description: "Deep clean & conditioning",
-    videoUrl: "/videos/white_luxury_car_interior_detailing.mp4",
+    videoPath: "/videos/white_luxury_car_interior_detailing.mp4",
     accent: "#45B7D1",
   },
   {
@@ -34,7 +35,7 @@ const FEATURED_VIDEOS = [
     title: "Paint Correction",
     subtitle: "Metallic Silver BMW",
     description: "Restore shine & clarity",
-    videoUrl: "/videos/silver_luxury_car_polishing_finish.mp4",
+    videoPath: "/videos/silver_luxury_car_polishing_finish.mp4",
     accent: "#F9CA24",
   },
 ];
@@ -51,7 +52,14 @@ export function FeaturedVideoReel() {
   }, []);
 
   const active = FEATURED_VIDEOS[activeIndex];
-  const videoUrl = `${active.videoUrl}`;
+  
+  let videoUrl = "";
+  try {
+    const baseUrl = getApiUrl();
+    videoUrl = new URL(active.videoPath, baseUrl).href;
+  } catch {
+    videoUrl = active.videoPath;
+  }
 
   return (
     <View style={styles.container}>
@@ -62,10 +70,11 @@ export function FeaturedVideoReel() {
           autoPlay
           loop
           muted
+          playsInline
         />
       ) : (
         <View style={styles.videoPlaceholder}>
-          <ThemedText type="body">Premium Video</ThemedText>
+          <ThemedText type="body">Premium Video Available in Web View</ThemedText>
         </View>
       )}
 
@@ -121,6 +130,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     position: "absolute",
+    objectFit: "cover",
   } as any,
   videoPlaceholder: {
     width: "100%",
@@ -128,6 +138,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#2a2a2a",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: Spacing.lg,
   },
   overlay: {
     position: "absolute",
