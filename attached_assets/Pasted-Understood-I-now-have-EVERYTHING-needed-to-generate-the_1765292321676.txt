@@ -1,0 +1,285 @@
+Understood. I now have EVERYTHING needed to generate the full cinematic Replit monorepo prompt for DetailProX, integrating:
+	•	Premium oversized luxury fonts (Pluvix families)
+	•	High-end commercial automotive aesthetics
+	•	Dark sophisticated palette
+	•	Dramatic lighting
+	•	Smooth 60fps animations
+	•	Glassmorphism similar to your screenshots (Control Center UI)
+	•	Floating emotional mascot on all pages
+	•	Video reels that autoplay on loop
+	•	Realistic graphics and haptic feedback
+	•	Supabase backend
+	•	A widget for iOS and Android
+	•	Mascot = app logo, icon, favicon
+	•	High-contrast minimalism
+	•	Fully fluid navigation
+	•	Expo iOS plus Android app
+	•	Entire Replit monorepo structure
+
+Below is the COMPLETE monorepo generator prompt you can paste directly into Replit’s AI agent to scaffold the project in one step.
+
+⸻
+
+FULL CINEMATIC REPLIT MONOREPO GENERATOR PROMPT
+
+Paste the following into Replit AI exactly:
+
+⸻
+
+PROMPT START
+
+Create a full cinematic Turborepo monorepo named DetailProX, a premium mobile detailing application built with:
+	•	Expo (React Native) for iOS and Android
+	•	Next.js for the admin dashboard
+	•	Supabase for database, auth, storage, and booking operations
+
+The design direction must be:
+	•	Deep black + luxury high-end commercial automotive aesthetic
+	•	Glassmorphism UI identical to iOS Control Center (blur, translucency, rounded tiles, soft shadows)
+	•	Dark background gradients with cinematic lighting
+	•	Smooth 60fps animations applied to every transition
+	•	Premium oversized typography using Pluvix-inspired luxury fonts
+	•	High-contrast minimalism, clean spacing, elevated glossy surfaces
+	•	Dynamic floating mascot on every screen (emotional, subtle movement, soft glowing aura)
+	•	Mascot is also the app icon, splash screen emblem, and favicon
+	•	Include fluid page transitions and haptic feedback
+
+Include a home screen WIDGET for both iOS and Android.
+Widget displays:
+	•	Next appointment
+	•	Quick “Book Now” button
+	•	Quick “My Vehicle” button
+	•	Today’s promotions
+	•	Mini floating mascot
+
+The app must also contain video-reel screens (mp4 or expo-av) that autoplay on loop for service showcases with cinematic detail shots of car cleaning, polishing, ceramic coating, etc.
+
+⸻
+
+1. Create Monorepo Structure
+
+detailprox/
+├── apps/
+│   ├── mobile/          # Expo app
+│   └── admin/           # Next.js dashboard
+│
+├── packages/
+│   ├── ui/              # Shared RN + Web components (glassmorphism)
+│   ├── api/             # Supabase client wrappers
+│   ├── types/           # Shared TypeScript contracts
+│   └── theme/           # Colors, typography, animations
+│
+├── supabase/
+│   ├── migrations/
+│   ├── seeds/
+│   └── policies/
+│
+├── turbo.json
+├── package.json
+└── README.md
+
+
+⸻
+
+2. Supabase Schema Requirements
+
+Create tables:
+
+profiles
+	•	id uuid pk
+	•	full_name
+	•	phone
+	•	avatar_url
+	•	created_at
+
+services
+	•	id
+	•	name
+	•	description
+	•	price
+	•	duration_minutes
+	•	video_url (for cinematic loops)
+	•	image_url
+
+bookings
+	•	id
+	•	user_id
+	•	service_id
+	•	appointment_date
+	•	appointment_time
+	•	location text
+	•	car_photos text[]
+	•	status (pending, confirmed, in_progress, completed)
+	•	payment_status (unpaid, deposit, paid)
+	•	created_at
+
+vehicles
+	•	id
+	•	user_id
+	•	make
+	•	model
+	•	year
+	•	photo_url
+
+messages (for mascot guidance logs)
+	•	id
+	•	user_id
+	•	timestamp
+	•	context
+	•	screen_name
+
+Enable RLS with user ownership.
+
+⸻
+
+3. Mobile App Requirements (Expo)
+
+Screens:
+	1.	Splash Screen
+	•	Mascot floats, glows softly
+	•	Oversized luxury typography “DetailProX”
+	•	Cinematic fade-in lighting sweep
+	2.	Home Screen
+	•	Glassmorphic tiles (Services, My Car, Book Now, Promotions)
+	•	Cinematic looping background video
+	•	Floating mascot that reacts with emotional animations
+	•	Haptic feedback for every interaction
+	3.	Service List Screen
+	•	Oversized typography
+	•	Each service tile uses glassmorphism
+	•	Service cinematic reel plays on hover/scroll
+	4.	Service Details Screen
+	•	Autoplay video
+	•	Big bold pricing
+	•	Add-ons
+	•	“Book Now” CTA
+	5.	Booking Flow
+	•	Step 1: Select date
+	•	Step 2: Time
+	•	Step 3: Location
+	•	Step 4: Upload car photos
+	•	Step 5: Payment
+	6.	My Bookings
+	•	Glassmorphic timeline
+	•	Status progress animation
+	7.	My Vehicle
+	•	Saved vehicle with ability to update photo
+	•	Smooth parallax animations
+	8.	Floating Mascot Overlay
+	•	Present on every screen
+	•	Gives small instructional speech bubbles
+	•	Moves subtly (floating)
+	•	Emotion states (happy, thinking, waiting)
+
+Additional Requirements:
+	•	Full gesture navigation
+	•	60fps transitions using Reanimated
+	•	expo-av for looping videos
+	•	expo-haptics for premium feedback
+	•	expo-blur for glassmorphism
+	•	expo-font for luxury fonts
+
+⸻
+
+4. Admin Dashboard (Next.js)
+
+Features:
+	•	Login (Supabase)
+	•	View all bookings
+	•	Calendar view
+	•	Customer list
+	•	Upload/edit services
+	•	Upload service cinematic reels
+	•	Vehicle registry
+	•	Analytics dashboard
+	•	Deep glassmorphism UI consistent with mobile
+
+⸻
+
+5. Mascot Requirements
+
+Create a floating mascot component:
+	•	Present on every page
+	•	Uses Lottie or Reanimated animations
+	•	Emotional states: neutral, instructive, excited, thinking, idle bounce
+	•	Acts as interactive guide
+	•	Used as:
+	•	App icon
+	•	Favicon
+	•	Logo
+	•	Splash emblem
+	•	Widget brand element
+
+Mascot must reference the aesthetic style of the provided screenshots (rounded, soft glow, minimal color accents).
+
+⸻
+
+6. Widget Requirements
+
+Create apps/mobile/widgets/DetailProXWidget:
+	•	Show next appointment
+	•	Show quick booking button
+	•	Mini floating mascot animation
+	•	Works for iOS (WidgetKit / expo-modules)
+	•	Works for Android (Glance)
+
+⸻
+
+7. Theming Requirements
+
+Create packages/theme/index.ts using:
+
+Colors:
+	•	Deep black
+	•	Graphite grey
+	•	Smoke glass white
+	•	Soft neon highlights (optional)
+
+Typography:
+
+Use Pluvix-inspired premium fonts with oversized weights:
+	•	Zayan Luxury
+	•	Retrola Ink
+	•	Stronghold Freak
+	•	Beepop Shadow
+	•	Pluvix Handmade
+
+Animations:
+	•	Parallax
+	•	Fade-up
+	•	Lighting sweeps
+	•	Glass card expansion
+
+⸻
+
+8. Generate Starter Code
+
+Scaffold all components, screens, navigation, theme files, and Supabase integration.
+
+PROMPT END
+
+⸻
+
+Your monorepo generator prompt is ready.
+
+When you paste this into Replit’s AI agent, it will scaffold:
+	•	Complete Supabase schema
+	•	All app folders
+	•	Glassmorphism UI components
+	•	Cinematic transitions
+	•	Mascot system
+	•	Video reel components
+	•	Widget structure
+	•	Full Expo + Next.js project
+
+⸻
+
+If you want, I can now generate:
+	1.	Mascot design concept
+	2.	App icon and splash screen
+	3.	Entire code for the mobile app
+	4.	Full admin dashboard code
+	5.	Option B (professional upgrade) version
+	6.	Widget implementation code
+
+Tell me which part you want next.
