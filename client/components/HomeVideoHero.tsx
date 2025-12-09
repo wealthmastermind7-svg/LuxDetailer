@@ -34,22 +34,25 @@ const HERO_VIDEOS = [
 
 export function HomeVideoHero({ onPress }: HomeVideoHeroProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const videoOpacity = useSharedValue(1);
+  const [nextIndex, setNextIndex] = useState(1);
+  const nextVideoOpacity = useSharedValue(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      videoOpacity.value = withTiming(0, { duration: 600 });
+      nextVideoOpacity.value = withTiming(1, { duration: 800 });
       setTimeout(() => {
         setActiveIndex((prev) => (prev + 1) % HERO_VIDEOS.length);
-        videoOpacity.value = withTiming(1, { duration: 600 });
-      }, 600);
+        setNextIndex((prev) => (prev + 1) % HERO_VIDEOS.length);
+        nextVideoOpacity.value = 0;
+      }, 800);
     }, 8000);
     return () => clearInterval(interval);
-  }, [videoOpacity]);
+  }, [nextVideoOpacity]);
 
   const active = HERO_VIDEOS[activeIndex];
+  const next = HERO_VIDEOS[nextIndex];
 
-  const videoUrl = (() => {
+  const activeVideoUrl = (() => {
     try {
       const baseUrl = getApiUrl();
       return new URL(active.videoPath, baseUrl).href;
@@ -58,38 +61,74 @@ export function HomeVideoHero({ onPress }: HomeVideoHeroProps) {
     }
   })();
 
-  const player = useVideoPlayer(videoUrl, (player) => {
+  const nextVideoUrl = (() => {
+    try {
+      const baseUrl = getApiUrl();
+      return new URL(next.videoPath, baseUrl).href;
+    } catch {
+      return next.videoPath;
+    }
+  })();
+
+  const activePlayer = useVideoPlayer(activeVideoUrl, (player) => {
     player.loop = true;
     player.muted = true;
     player.play();
   });
 
-  const videoAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: videoOpacity.value,
+  const nextPlayer = useVideoPlayer(nextVideoUrl, (player) => {
+    player.loop = true;
+    player.muted = true;
+    player.play();
+  });
+
+  const nextVideoAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: nextVideoOpacity.value,
   }));
 
   return (
     <Animated.View style={styles.container} entering={FadeIn.duration(800)}>
-      <Animated.View style={[styles.videoWrapper, videoAnimatedStyle]}>
-        {Platform.OS === "web" ? (
+      {Platform.OS === "web" ? (
+        <>
           <video
-            src={videoUrl}
+            src={activeVideoUrl}
             style={styles.videoWeb as any}
             autoPlay
             loop
             muted
             playsInline
           />
-        ) : (
+          <Animated.View style={[styles.videoOverlay, nextVideoAnimatedStyle]}>
+            <video
+              src={nextVideoUrl}
+              style={styles.videoWeb as any}
+              autoPlay
+              loop
+              muted
+              playsInline
+            />
+          </Animated.View>
+        </>
+      ) : (
+        <>
           <VideoView
             style={styles.videoNative}
-            player={player}
+            player={activePlayer}
             nativeControls={false}
             contentFit="cover"
             pointerEvents="none"
           />
-        )}
-      </Animated.View>
+          <Animated.View style={[styles.videoOverlay, nextVideoAnimatedStyle]}>
+            <VideoView
+              style={styles.videoNative}
+              player={nextPlayer}
+              nativeControls={false}
+              contentFit="cover"
+              pointerEvents="none"
+            />
+          </Animated.View>
+        </>
+      )}
 
       <View style={styles.indicators}>
         {HERO_VIDEOS.map((video, index) => (
@@ -119,10 +158,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
     backgroundColor: "#1a1a1a",
   },
-  videoWrapper: {
-    width: "100%",
-    height: "100%",
-  },
   videoNative: {
     width: "100%",
     height: "100%",
@@ -132,6 +167,13 @@ const styles = StyleSheet.create({
     height: "100%",
     objectFit: "cover",
   } as any,
+  videoOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+  },
   indicators: {
     position: "absolute",
     bottom: Spacing.lg,
