@@ -1,6 +1,5 @@
 import React from "react";
-import { ScrollView, View, StyleSheet, Pressable } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ScrollView, View, StyleSheet, ActivityIndicator } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
@@ -8,6 +7,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
@@ -17,9 +17,31 @@ import { BookingsStackParamList } from "@/navigation/BookingsStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<BookingsStackParamList>;
 
-type BookingStatus = "pending" | "confirmed" | "in_progress" | "completed";
+type BookingStatus = "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled";
 
-interface Booking {
+interface ApiBooking {
+  id: string;
+  userId: string | null;
+  vehicleId: string | null;
+  serviceId: string | null;
+  date: string;
+  time: string;
+  status: string;
+  location: string | null;
+  notes: string | null;
+  totalPrice: string | null;
+  progress: number | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+interface Service {
+  id: string;
+  name: string;
+  price: string;
+}
+
+interface DisplayBooking {
   id: string;
   service: string;
   date: string;
@@ -29,50 +51,11 @@ interface Booking {
   progress: number;
 }
 
-const BOOKINGS: Booking[] = [
-  {
-    id: "1",
-    service: "Full Detail",
-    date: "Dec 18, 2024",
-    time: "10:00 AM",
-    status: "confirmed",
-    price: 299,
-    progress: 0,
-  },
-  {
-    id: "2",
-    service: "Ceramic Coating",
-    date: "Dec 10, 2024",
-    time: "9:00 AM",
-    status: "in_progress",
-    price: 899,
-    progress: 60,
-  },
-  {
-    id: "3",
-    service: "Interior Detail",
-    date: "Nov 28, 2024",
-    time: "2:00 PM",
-    status: "completed",
-    price: 149,
-    progress: 100,
-  },
-  {
-    id: "4",
-    service: "Paint Correction",
-    date: "Nov 15, 2024",
-    time: "11:00 AM",
-    status: "completed",
-    price: 449,
-    progress: 100,
-  },
-];
-
-const STATUS_CONFIG = {
-  pending: {
+const STATUS_CONFIG: Record<BookingStatus, { color: string; icon: string; label: string }> = {
+  scheduled: {
     color: Colors.dark.textSecondary,
     icon: "clock",
-    label: "Pending",
+    label: "Scheduled",
   },
   confirmed: {
     color: Colors.dark.accent,
@@ -89,24 +72,57 @@ const STATUS_CONFIG = {
     icon: "check-circle",
     label: "Completed",
   },
+  cancelled: {
+    color: Colors.dark.textSecondary,
+    icon: "x-circle",
+    label: "Cancelled",
+  },
 };
 
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+}
+
 export default function BookingsScreen() {
-  const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<NavigationProp>();
 
-  const upcomingBookings = BOOKINGS.filter(b => b.status !== "completed");
-  const pastBookings = BOOKINGS.filter(b => b.status === "completed");
+  const { data: bookings = [], isLoading: bookingsLoading } = useQuery<ApiBooking[]>({
+    queryKey: ["/api/bookings"],
+  });
+
+  const { data: services = [], isLoading: servicesLoading } = useQuery<Service[]>({
+    queryKey: ["/api/services"],
+  });
+
+  const isLoading = bookingsLoading || servicesLoading;
+
+  const displayBookings: DisplayBooking[] = bookings.map(booking => {
+    const service = services.find(s => s.id === booking.serviceId);
+    return {
+      id: booking.id,
+      service: service?.name || "Unknown Service",
+      date: formatDate(booking.date),
+      time: booking.time,
+      status: (booking.status as BookingStatus) || "scheduled",
+      price: booking.totalPrice ? parseFloat(booking.totalPrice) : 0,
+      progress: booking.progress || 0,
+    };
+  });
+
+  const upcomingBookings = displayBookings.filter(b => b.status !== "completed" && b.status !== "cancelled");
+  const pastBookings = displayBookings.filter(b => b.status === "completed");
 
   const handleBookingPress = (bookingId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate("BookingDetails", { bookingId });
   };
 
-  const renderBookingCard = (booking: Booking, showTimeline: boolean = false) => {
-    const status = STATUS_CONFIG[booking.status];
+  const renderBookingCard = (booking: DisplayBooking, showTimeline: boolean = false) => {
+    const status = STATUS_CONFIG[booking.status] || STATUS_CONFIG.scheduled;
     
     return (
       <View key={booking.id} style={styles.timelineItem}>
@@ -162,6 +178,14 @@ export default function BookingsScreen() {
     );
   };
 
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={Colors.dark.accent} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -198,7 +222,7 @@ export default function BookingsScreen() {
           </View>
         ) : null}
 
-        {BOOKINGS.length === 0 ? (
+        {displayBookings.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIcon}>
               <Feather name="calendar" size={48} color={Colors.dark.textSecondary} />
@@ -225,6 +249,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark.backgroundRoot,
+  },
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   scrollView: {
     flex: 1,

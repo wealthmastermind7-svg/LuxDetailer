@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ScrollView, View, StyleSheet, Pressable, TextInput } from "react-native";
+import { ScrollView, View, StyleSheet, Pressable, TextInput, ActivityIndicator, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation } from "@react-navigation/native";
@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
@@ -14,8 +15,21 @@ import { Button } from "@/components/Button";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
+import { apiRequest } from "@/lib/query-client";
 
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
+
+interface Service {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  price: string;
+  duration: number;
+  imageUrl: string | null;
+  features: string | null;
+  isActive: boolean | null;
+}
 
 const STEPS = ["Service", "Date", "Time", "Location", "Confirm"];
 
@@ -24,42 +38,86 @@ const TIME_SLOTS = [
   "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"
 ];
 
-const DATES = [
-  { day: "Mon", date: "16", month: "Dec" },
-  { day: "Tue", date: "17", month: "Dec" },
-  { day: "Wed", date: "18", month: "Dec" },
-  { day: "Thu", date: "19", month: "Dec" },
-  { day: "Fri", date: "20", month: "Dec" },
-  { day: "Sat", date: "21", month: "Dec" },
-  { day: "Sun", date: "22", month: "Dec" },
-];
-
-const SERVICES_LIST = [
-  { id: "1", name: "Full Detail", price: 299 },
-  { id: "2", name: "Ceramic Coating", price: 899 },
-  { id: "3", name: "Paint Correction", price: 449 },
-  { id: "4", name: "Interior Detail", price: 149 },
-];
+function generateDates(): { day: string; date: string; month: string; fullDate: string }[] {
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const dates = [];
+  const today = new Date();
+  
+  for (let i = 1; i <= 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    dates.push({
+      day: days[date.getDay()],
+      date: date.getDate().toString(),
+      month: months[date.getMonth()],
+      fullDate: date.toISOString().split("T")[0],
+    });
+  }
+  return dates;
+}
 
 export default function BookingFlowScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const navigation = useNavigation<NavigationProp>();
+  const queryClient = useQueryClient();
   
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDateDisplay, setSelectedDateDisplay] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
+
+  const DATES = generateDates();
+
+  const { data: services = [], isLoading } = useQuery<Service[]>({
+    queryKey: ["/api/services"],
+  });
+
+  const createBookingMutation = useMutation({
+    mutationFn: async (bookingData: {
+      serviceId: string;
+      date: string;
+      time: string;
+      location: string;
+      notes?: string;
+      totalPrice: string;
+    }) => {
+      return apiRequest("POST", "/api/bookings", bookingData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/bookings"] });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert(
+        "Booking Confirmed!",
+        "Your detailing appointment has been scheduled. We'll see you soon!",
+        [{ text: "OK", onPress: () => navigation.goBack() }]
+      );
+    },
+    onError: () => {
+      Alert.alert("Error", "Failed to create booking. Please try again.");
+    },
+  });
 
   const handleNext = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      navigation.goBack();
+      const selectedServiceData = services.find(s => s.id === selectedService);
+      if (selectedServiceData && selectedDate && selectedTime) {
+        createBookingMutation.mutate({
+          serviceId: selectedService!,
+          date: selectedDate,
+          time: selectedTime,
+          location,
+          notes: notes || undefined,
+          totalPrice: selectedServiceData.price,
+        });
+      }
     }
   };
 
@@ -81,7 +139,15 @@ export default function BookingFlowScreen() {
     }
   };
 
-  const selectedServiceData = SERVICES_LIST.find(s => s.id === selectedService);
+  const selectedServiceData = services.find(s => s.id === selectedService);
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={Colors.dark.accent} />
+      </View>
+    );
+  }
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -94,7 +160,7 @@ export default function BookingFlowScreen() {
             <ThemedText type="body" style={styles.stepSubtitle}>
               Choose the detailing service you need
             </ThemedText>
-            {SERVICES_LIST.map((service) => (
+            {services.map((service) => (
               <GlassCard
                 key={service.id}
                 onPress={() => {
@@ -110,7 +176,7 @@ export default function BookingFlowScreen() {
                   <View>
                     <ThemedText type="h4">{service.name}</ThemedText>
                     <ThemedText type="price" style={styles.optionPrice}>
-                      ${service.price}
+                      ${parseFloat(service.price).toFixed(0)}
                     </ThemedText>
                   </View>
                   {selectedService === service.id ? (
@@ -143,11 +209,12 @@ export default function BookingFlowScreen() {
                   key={index}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setSelectedDate(dateItem.date);
+                    setSelectedDate(dateItem.fullDate);
+                    setSelectedDateDisplay(`${dateItem.month} ${dateItem.date}`);
                   }}
                   style={({ pressed }) => [
                     styles.dateCard,
-                    selectedDate === dateItem.date && styles.dateCardSelected,
+                    selectedDate === dateItem.fullDate && styles.dateCardSelected,
                     pressed && styles.dateCardPressed,
                   ]}
                 >
@@ -156,7 +223,7 @@ export default function BookingFlowScreen() {
                   </ThemedText>
                   <ThemedText type="h2" style={[
                     styles.dateNumber,
-                    selectedDate === dateItem.date && styles.dateNumberSelected,
+                    selectedDate === dateItem.fullDate && styles.dateNumberSelected,
                   ]}>
                     {dateItem.date}
                   </ThemedText>
@@ -261,7 +328,7 @@ export default function BookingFlowScreen() {
               </View>
               <View style={styles.summaryRow}>
                 <ThemedText type="body" style={styles.summaryLabel}>Date</ThemedText>
-                <ThemedText type="h4">Dec {selectedDate}, 2024</ThemedText>
+                <ThemedText type="h4">{selectedDateDisplay}</ThemedText>
               </View>
               <View style={styles.summaryRow}>
                 <ThemedText type="body" style={styles.summaryLabel}>Time</ThemedText>
@@ -275,7 +342,7 @@ export default function BookingFlowScreen() {
               <View style={styles.summaryRow}>
                 <ThemedText type="h4">Total</ThemedText>
                 <ThemedText type="price" style={styles.totalPrice}>
-                  ${selectedServiceData?.price}
+                  ${selectedServiceData ? parseFloat(selectedServiceData.price).toFixed(0) : 0}
                 </ThemedText>
               </View>
             </GlassCard>
@@ -339,10 +406,14 @@ export default function BookingFlowScreen() {
           ) : null}
           <Button 
             onPress={handleNext} 
-            disabled={!canProceed()}
+            disabled={!canProceed() || createBookingMutation.isPending}
             style={[styles.nextButton, currentStep === 0 && styles.nextButtonFull]}
           >
-            {currentStep === STEPS.length - 1 ? "Confirm Booking" : "Continue"}
+            {createBookingMutation.isPending 
+              ? "Booking..." 
+              : currentStep === STEPS.length - 1 
+                ? "Confirm Booking" 
+                : "Continue"}
           </Button>
         </View>
       </View>
@@ -354,6 +425,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark.backgroundRoot,
+  },
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   progressContainer: {
     flexDirection: "row",
