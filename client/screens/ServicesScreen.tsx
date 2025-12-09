@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
 import { FloatingMascot } from "@/components/FloatingMascot";
+import { FeaturedVideoReel } from "@/components/FeaturedVideoReel";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { ServicesStackParamList } from "@/navigation/ServicesStackNavigator";
 
@@ -93,6 +94,11 @@ export default function ServicesScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        <FeaturedVideoReel />
+        
+        <ThemedText type="h2" style={styles.sectionTitle}>
+          Our Services
+        </ThemedText>
         <ThemedText type="body" style={styles.subtitle}>
           Professional detailing services for your vehicle
         </ThemedText>
@@ -176,6 +182,9 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: Spacing.lg,
+  },
+  sectionTitle: {
+    marginBottom: Spacing.sm,
   },
   subtitle: {
     opacity: 0.7,
