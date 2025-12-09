@@ -12,6 +12,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
 import { FloatingMascot } from "@/components/FloatingMascot";
 import { HeaderTitle } from "@/components/HeaderTitle";
+import { HomeVideoHero } from "@/components/HomeVideoHero";
 import { Colors, Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 
@@ -80,17 +81,7 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        <View style={styles.heroSection}>
-          <ThemedText type="h1" style={styles.heroTitle}>
-            Premium Car
-          </ThemedText>
-          <ThemedText type="h1" style={styles.heroTitleAccent}>
-            Detailing
-          </ThemedText>
-          <ThemedText type="body" style={styles.heroSubtitle}>
-            Experience the art of automotive perfection
-          </ThemedText>
-        </View>
+        <HomeVideoHero onPress={handleBookNow} />
 
         <GlassCard 
           onPress={handleBookNow} 
@@ -229,24 +220,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.backgroundSecondary,
     justifyContent: "center",
     alignItems: "center",
-  },
-  heroSection: {
-    marginBottom: Spacing.xl,
-  },
-  heroTitle: {
-    fontSize: 48,
-    fontWeight: "700",
-    letterSpacing: -1,
-  },
-  heroTitleAccent: {
-    fontSize: 48,
-    fontWeight: "700",
-    letterSpacing: -1,
-    color: Colors.dark.accent,
-  },
-  heroSubtitle: {
-    marginTop: Spacing.sm,
-    opacity: 0.7,
   },
   bookNowCard: {
     marginBottom: Spacing.lg,
