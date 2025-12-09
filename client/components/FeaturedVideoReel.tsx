@@ -2,6 +2,14 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Dimensions, Platform } from "react-native";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { LinearGradient } from "expo-linear-gradient";
+import Animated, {
+  FadeIn,
+  FadeOut,
+  SlideInDown,
+  withTiming,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { getApiUrl } from "@/lib/query-client";
@@ -43,6 +51,7 @@ const FEATURED_VIDEOS = [
 
 export function FeaturedVideoReel() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const indicatorProgress = useSharedValue(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -50,6 +59,10 @@ export function FeaturedVideoReel() {
     }, 7000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    indicatorProgress.value = withTiming(1, { duration: 300 });
+  }, [activeIndex, indicatorProgress]);
 
   const active = FEATURED_VIDEOS[activeIndex];
   
@@ -66,6 +79,10 @@ export function FeaturedVideoReel() {
     player.muted = true;
     player.play();
   });
+
+  const contentAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: indicatorProgress.value,
+  }));
 
   return (
     <View style={styles.container}>
@@ -93,23 +110,47 @@ export function FeaturedVideoReel() {
         style={styles.overlay}
       />
 
-      <View style={styles.content}>
-        <ThemedText type="h2" style={[styles.title, { color: active.accent }]}>
-          {active.title}
-        </ThemedText>
+      <Animated.View
+        style={[styles.content, contentAnimatedStyle]}
+        entering={FadeIn.duration(500).springify()}
+        exiting={FadeOut.duration(300)}
+        key={`content-${activeIndex}`}
+      >
+        <Animated.View
+          entering={SlideInDown.duration(600).springify()}
+          key={`title-${activeIndex}`}
+        >
+          <ThemedText type="h2" style={[styles.title, { color: active.accent }]}>
+            {active.title}
+          </ThemedText>
+        </Animated.View>
 
-        <ThemedText type="h4" style={styles.subtitle}>
-          {active.subtitle}
-        </ThemedText>
+        <Animated.View
+          entering={SlideInDown.delay(100).duration(600).springify()}
+          key={`subtitle-${activeIndex}`}
+        >
+          <ThemedText type="h4" style={styles.subtitle}>
+            {active.subtitle}
+          </ThemedText>
+        </Animated.View>
 
-        <ThemedText type="body" style={styles.description}>
-          {active.description}
-        </ThemedText>
-      </View>
+        <Animated.View
+          entering={SlideInDown.delay(200).duration(600).springify()}
+          key={`desc-${activeIndex}`}
+        >
+          <ThemedText type="body" style={styles.description}>
+            {active.description}
+          </ThemedText>
+        </Animated.View>
+      </Animated.View>
 
-      <View style={styles.indicators}>
+      <Animated.View
+        style={styles.indicators}
+        entering={FadeIn.duration(400)}
+        key={`indicators-${activeIndex}`}
+      >
         {FEATURED_VIDEOS.map((service, index) => (
-          <View
+          <Animated.View
             key={index}
             style={[
               styles.indicator,
@@ -118,9 +159,10 @@ export function FeaturedVideoReel() {
                 { backgroundColor: service.accent },
               ],
             ]}
+            entering={FadeIn.duration(300)}
           />
         ))}
-      </View>
+      </Animated.View>
     </View>
   );
 }
