@@ -5,37 +5,37 @@ import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
-const FEATURED_SERVICES = [
+const FEATURED_VIDEOS = [
   {
     id: 1,
     title: "Full Exterior Detail",
+    subtitle: "Premium Red Ferrari",
     description: "Complete wash, polish & protection",
     icon: "droplet",
-    duration: "4-5 hours",
     accent: "#FF6B6B",
   },
   {
     id: 2,
     title: "Ceramic Coating",
+    subtitle: "Luxury Black Mercedes",
     description: "Premium paint protection",
     icon: "shield",
-    duration: "2-3 hours",
     accent: "#4ECDC4",
   },
   {
     id: 3,
     title: "Interior Detailing",
+    subtitle: "Premium White Tesla",
     description: "Deep clean & conditioning",
     icon: "wind",
-    duration: "2 hours",
     accent: "#45B7D1",
   },
   {
     id: 4,
     title: "Paint Correction",
+    subtitle: "Metallic Silver BMW",
     description: "Restore shine & clarity",
     icon: "zap",
-    duration: "3-4 hours",
     accent: "#F9CA24",
   },
 ];
@@ -46,18 +46,18 @@ export function FeaturedVideoReel() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % FEATURED_SERVICES.length);
-    }, 4000);
+      setActiveIndex((prev) => (prev + 1) % FEATURED_VIDEOS.length);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  const active = FEATURED_SERVICES[activeIndex];
+  const active = FEATURED_VIDEOS[activeIndex];
 
   return (
     <View style={styles.container}>
       <LinearGradient
         colors={[
-          `${active.accent}40`,
+          `${active.accent}50`,
           `${active.accent}20`,
           "rgba(10, 132, 255, 0.1)",
         ]}
@@ -67,28 +67,30 @@ export function FeaturedVideoReel() {
       />
 
       <View style={styles.content}>
-        <View style={[styles.iconContainer, { borderColor: active.accent }]}>
-          <Feather name={active.icon as any} size={72} color={active.accent} />
+        <View style={[styles.videoPlaceholder, { borderColor: active.accent }]}>
+          <Feather name={active.icon as any} size={80} color={active.accent} />
+          <ThemedText type="caption" style={styles.videoLabel}>
+            HD Video Loop
+          </ThemedText>
         </View>
 
-        <ThemedText type="h2" style={styles.title}>
-          {active.title}
-        </ThemedText>
+        <View style={styles.textContent}>
+          <ThemedText type="h2" style={[styles.title, { color: active.accent }]}>
+            {active.title}
+          </ThemedText>
 
-        <ThemedText type="body" style={styles.description}>
-          {active.description}
-        </ThemedText>
+          <ThemedText type="h4" style={styles.subtitle}>
+            {active.subtitle}
+          </ThemedText>
 
-        <View style={styles.meta}>
-          <Feather name="clock" size={14} color={Colors.dark.textSecondary} />
-          <ThemedText type="small" style={styles.duration}>
-            {active.duration}
+          <ThemedText type="body" style={styles.description}>
+            {active.description}
           </ThemedText>
         </View>
       </View>
 
       <View style={styles.indicators}>
-        {FEATURED_SERVICES.map((service, index) => (
+        {FEATURED_VIDEOS.map((service, index) => (
           <View
             key={index}
             style={[
@@ -108,16 +110,15 @@ export function FeaturedVideoReel() {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    minHeight: 360,
+    minHeight: 380,
     borderRadius: BorderRadius.lg,
     overflow: "hidden",
     marginBottom: Spacing.xl,
     backgroundColor: "#1a1a1a",
     borderWidth: 2,
     borderColor: Colors.dark.glassBorder,
-    justifyContent: "space-between",
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
   },
   gradient: {
     position: "absolute",
@@ -128,48 +129,49 @@ const styles = StyleSheet.create({
   },
   content: {
     zIndex: 2,
-    justifyContent: "center",
+    flexDirection: "row",
     alignItems: "center",
-    paddingVertical: Spacing.lg,
+    gap: Spacing.lg,
   },
-  iconContainer: {
+  videoPlaceholder: {
     width: 140,
     height: 140,
-    borderRadius: 70,
+    borderRadius: BorderRadius.lg,
     borderWidth: 3,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: Spacing.xl,
-    backgroundColor: "rgba(10, 10, 10, 0.5)",
+    backgroundColor: "rgba(10, 10, 10, 0.6)",
+    flexShrink: 0,
+  },
+  videoLabel: {
+    marginTop: Spacing.sm,
+    opacity: 0.7,
+    fontSize: 10,
+  },
+  textContent: {
+    flex: 1,
+    justifyContent: "center",
   },
   title: {
-    textAlign: "center",
-    marginBottom: Spacing.md,
-    color: Colors.dark.text,
-    fontSize: 28,
+    marginBottom: Spacing.xs,
+    fontSize: 24,
     fontWeight: "700",
   },
-  description: {
-    textAlign: "center",
-    opacity: 0.8,
-    marginBottom: Spacing.lg,
-    fontSize: 16,
-  },
-  meta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  duration: {
-    color: Colors.dark.textSecondary,
+  subtitle: {
+    opacity: 0.7,
+    marginBottom: Spacing.sm,
     fontSize: 14,
+    fontWeight: "500",
+  },
+  description: {
+    opacity: 0.8,
+    fontSize: 15,
   },
   indicators: {
     flexDirection: "row",
     justifyContent: "center",
     gap: Spacing.sm,
-    zIndex: 2,
-    marginTop: Spacing.md,
+    marginTop: Spacing.lg,
   },
   indicator: {
     width: 10,
