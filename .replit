@@ -22,7 +22,7 @@ localPort = 8082
 externalPort = 3001
 
 [[ports]]
-localPort = 34675
+localPort = 40131
 externalPort = 3000
 
 [env]
