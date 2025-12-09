@@ -2,45 +2,62 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { Platform, StyleSheet } from "react-native";
+import { Platform, StyleSheet, View, Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
+import ServicesStackNavigator from "@/navigation/ServicesStackNavigator";
+import BookingsStackNavigator from "@/navigation/BookingsStackNavigator";
 import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
-import { useTheme } from "@/hooks/useTheme";
+import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
+import * as Haptics from "expo-haptics";
 
 export type MainTabParamList = {
   HomeTab: undefined;
+  ServicesTab: undefined;
+  BookNowTab: undefined;
+  BookingsTab: undefined;
   ProfileTab: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+function BookNowPlaceholder() {
+  return <View />;
+}
+
 export default function MainTabNavigator() {
-  const { theme, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
       initialRouteName="HomeTab"
       screenOptions={{
-        tabBarActiveTintColor: theme.tabIconSelected,
-        tabBarInactiveTintColor: theme.tabIconDefault,
+        tabBarActiveTintColor: Colors.dark.accent,
+        tabBarInactiveTintColor: Colors.dark.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
           backgroundColor: Platform.select({
             ios: "transparent",
-            android: theme.backgroundRoot,
+            android: Colors.dark.backgroundRoot,
           }),
           borderTopWidth: 0,
           elevation: 0,
+          height: 80 + insets.bottom,
+          paddingBottom: insets.bottom,
         },
         tabBarBackground: () =>
           Platform.OS === "ios" ? (
             <BlurView
-              intensity={100}
-              tint={isDark ? "dark" : "light"}
+              intensity={80}
+              tint="dark"
               style={StyleSheet.absoluteFill}
             />
           ) : null,
         headerShown: false,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "500",
+        },
       }}
     >
       <Tab.Screen
@@ -50,6 +67,64 @@ export default function MainTabNavigator() {
           title: "Home",
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="ServicesTab"
+        component={ServicesStackNavigator}
+        options={{
+          title: "Services",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="grid" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="BookNowTab"
+        component={BookNowPlaceholder}
+        options={{
+          title: "",
+          tabBarIcon: () => null,
+          tabBarButton: (props) => {
+            const { style, ...restProps } = props as any;
+            return (
+              <Pressable
+                {...restProps}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  if (props.onPress) {
+                    props.onPress(undefined as any);
+                  }
+                }}
+                style={({ pressed }) => [
+                  styles.bookNowButton,
+                  pressed && styles.bookNowButtonPressed,
+                ]}
+              >
+                <View style={styles.bookNowInner}>
+                  <Feather name="plus" size={28} color="#FFFFFF" />
+                </View>
+              </Pressable>
+            );
+          },
+        }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            (navigation as any).navigate("HomeTab", {
+              screen: "BookingFlow",
+            });
+          },
+        })}
+      />
+      <Tab.Screen
+        name="BookingsTab"
+        component={BookingsStackNavigator}
+        options={{
+          title: "Bookings",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="calendar" size={size} color={color} />
           ),
         }}
       />
@@ -66,3 +141,27 @@ export default function MainTabNavigator() {
     </Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  bookNowButton: {
+    position: "relative",
+    top: -20,
+    justifyContent: "center",
+    alignItems: "center",
+    width: 64,
+    height: 64,
+  },
+  bookNowButtonPressed: {
+    transform: [{ scale: 0.95 }],
+    opacity: 0.9,
+  },
+  bookNowInner: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.dark.accent,
+    justifyContent: "center",
+    alignItems: "center",
+    ...Shadows.glow,
+  },
+});

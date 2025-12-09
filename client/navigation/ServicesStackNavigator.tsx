@@ -1,22 +1,18 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import HomeScreen from "@/screens/HomeScreen";
+import ServicesScreen from "@/screens/ServicesScreen";
 import ServiceDetailsScreen from "@/screens/ServiceDetailsScreen";
-import BookingFlowScreen from "@/screens/BookingFlowScreen";
-import MyVehicleScreen from "@/screens/MyVehicleScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { Colors } from "@/constants/theme";
 
-export type HomeStackParamList = {
-  Home: undefined;
+export type ServicesStackParamList = {
+  Services: undefined;
   ServiceDetails: { serviceId: string };
-  BookingFlow: { serviceId?: string } | undefined;
-  MyVehicle: undefined;
 };
 
-const Stack = createNativeStackNavigator<HomeStackParamList>();
+const Stack = createNativeStackNavigator<ServicesStackParamList>();
 
-export default function HomeStackNavigator() {
+export default function ServicesStackNavigator() {
   const screenOptions = useScreenOptions();
 
   return (
@@ -30,24 +26,14 @@ export default function HomeStackNavigator() {
       }}
     >
       <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{ headerShown: false }}
+        name="Services"
+        component={ServicesScreen}
+        options={{ headerTitle: "Our Services" }}
       />
       <Stack.Screen
         name="ServiceDetails"
         component={ServiceDetailsScreen}
         options={{ headerTitle: "Service Details" }}
-      />
-      <Stack.Screen
-        name="BookingFlow"
-        component={BookingFlowScreen}
-        options={{ headerTitle: "Book Appointment" }}
-      />
-      <Stack.Screen
-        name="MyVehicle"
-        component={MyVehicleScreen}
-        options={{ headerTitle: "My Vehicle" }}
       />
     </Stack.Navigator>
   );

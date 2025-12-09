@@ -1,18 +1,18 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import ProfileScreen from "@/screens/ProfileScreen";
-import SettingsScreen from "@/screens/SettingsScreen";
+import BookingsScreen from "@/screens/BookingsScreen";
+import BookingDetailsScreen from "@/screens/BookingDetailsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { Colors } from "@/constants/theme";
 
-export type ProfileStackParamList = {
-  Profile: undefined;
-  Settings: undefined;
+export type BookingsStackParamList = {
+  Bookings: undefined;
+  BookingDetails: { bookingId: string };
 };
 
-const Stack = createNativeStackNavigator<ProfileStackParamList>();
+const Stack = createNativeStackNavigator<BookingsStackParamList>();
 
-export default function ProfileStackNavigator() {
+export default function BookingsStackNavigator() {
   const screenOptions = useScreenOptions();
 
   return (
@@ -26,14 +26,14 @@ export default function ProfileStackNavigator() {
       }}
     >
       <Stack.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{ headerTitle: "Profile" }}
+        name="Bookings"
+        component={BookingsScreen}
+        options={{ headerTitle: "My Bookings" }}
       />
       <Stack.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{ headerTitle: "Settings" }}
+        name="BookingDetails"
+        component={BookingDetailsScreen}
+        options={{ headerTitle: "Booking Details" }}
       />
     </Stack.Navigator>
   );

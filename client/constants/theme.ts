@@ -1,105 +1,116 @@
 import { Platform } from "react-native";
 
-const tintColorLight = "#007AFF";
-const tintColorDark = "#0A84FF";
-
 export const Colors = {
   light: {
-    text: "#11181C",
+    text: "#ECEDEE",
+    textSecondary: "#9BA1A6",
     buttonText: "#FFFFFF",
     tabIconDefault: "#687076",
-    tabIconSelected: tintColorLight,
-    link: "#007AFF",
-    backgroundRoot: "#FFFFFF", // Elevation 0
-    backgroundDefault: "#F2F2F2", // Elevation 1
-    backgroundSecondary: "#E6E6E6", // Elevation 2
-    backgroundTertiary: "#D9D9D9", // Elevation 3
+    tabIconSelected: "#0A84FF",
+    link: "#0A84FF",
+    backgroundRoot: "#000000",
+    backgroundDefault: "#1C1C1E",
+    backgroundSecondary: "#2C2C2E",
+    backgroundTertiary: "#3A3A3C",
+    accent: "#0A84FF",
+    accentYellow: "#FFD60A",
+    accentGreen: "#30D158",
+    glassSurface: "rgba(255, 255, 255, 0.08)",
+    glassBorder: "rgba(255, 255, 255, 0.12)",
+    shadow: "rgba(0, 0, 0, 0.4)",
   },
   dark: {
     text: "#ECEDEE",
+    textSecondary: "#9BA1A6",
     buttonText: "#FFFFFF",
     tabIconDefault: "#9BA1A6",
-    tabIconSelected: tintColorDark,
+    tabIconSelected: "#0A84FF",
     link: "#0A84FF",
-    backgroundRoot: "#1F2123", // Elevation 0
-    backgroundDefault: "#2A2C2E", // Elevation 1
-    backgroundSecondary: "#353739", // Elevation 2
-    backgroundTertiary: "#404244", // Elevation 3
+    backgroundRoot: "#000000",
+    backgroundDefault: "#1C1C1E",
+    backgroundSecondary: "#2C2C2E",
+    backgroundTertiary: "#3A3A3C",
+    accent: "#0A84FF",
+    accentYellow: "#FFD60A",
+    accentGreen: "#30D158",
+    glassSurface: "rgba(255, 255, 255, 0.08)",
+    glassBorder: "rgba(255, 255, 255, 0.12)",
+    shadow: "rgba(0, 0, 0, 0.4)",
   },
 };
 
 export const Spacing = {
   xs: 4,
   sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  "2xl": 24,
-  "3xl": 32,
-  "4xl": 40,
-  "5xl": 48,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
   inputHeight: 48,
-  buttonHeight: 52,
+  buttonHeight: 56,
 };
 
 export const BorderRadius = {
   xs: 8,
   sm: 12,
-  md: 18,
+  md: 16,
   lg: 24,
-  xl: 30,
-  "2xl": 40,
-  "3xl": 50,
+  xl: 32,
   full: 9999,
 };
 
 export const Typography = {
+  display: {
+    fontSize: 64,
+    fontWeight: "700" as const,
+  },
   h1: {
-    fontSize: 32,
-    lineHeight: 40,
+    fontSize: 48,
     fontWeight: "700" as const,
   },
   h2: {
-    fontSize: 28,
-    lineHeight: 36,
+    fontSize: 36,
     fontWeight: "700" as const,
   },
   h3: {
-    fontSize: 24,
-    lineHeight: 32,
+    fontSize: 28,
     fontWeight: "600" as const,
   },
   h4: {
-    fontSize: 20,
-    lineHeight: 28,
+    fontSize: 22,
     fontWeight: "600" as const,
   },
   body: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 17,
+    fontWeight: "400" as const,
+  },
+  bodyLarge: {
+    fontSize: 20,
     fontWeight: "400" as const,
   },
   small: {
     fontSize: 14,
-    lineHeight: 20,
+    fontWeight: "400" as const,
+  },
+  caption: {
+    fontSize: 12,
     fontWeight: "400" as const,
   },
   link: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: "400" as const,
+    fontSize: 17,
+    fontWeight: "500" as const,
+  },
+  price: {
+    fontSize: 32,
+    fontWeight: "700" as const,
   },
 };
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: "system-ui",
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: "ui-serif",
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: "ui-rounded",
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: "ui-monospace",
   },
   default: {
@@ -111,8 +122,58 @@ export const Fonts = Platform.select({
   web: {
     sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
     serif: "Georgia, 'Times New Roman', serif",
-    rounded:
-      "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
+    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
+
+export const Shadows = {
+  small: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  medium: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  large: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  glow: {
+    shadowColor: "#0A84FF",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 0,
+  },
+};
+
+export const Glass = {
+  surface: "rgba(255, 255, 255, 0.08)",
+  surfaceHover: "rgba(255, 255, 255, 0.12)",
+  border: "rgba(255, 255, 255, 0.12)",
+  borderLight: "rgba(255, 255, 255, 0.18)",
+  blur: 20,
+};
+
+export const Animation = {
+  spring: {
+    damping: 15,
+    stiffness: 120,
+  },
+  timing: {
+    fast: 150,
+    normal: 300,
+    slow: 500,
+  },
+};
