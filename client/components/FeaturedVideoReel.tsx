@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Dimensions, Platform } from "react-native";
+import { VideoView, useVideoPlayer } from "expo-video";
 import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
@@ -42,7 +43,6 @@ const FEATURED_VIDEOS = [
 
 export function FeaturedVideoReel() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const { width } = Dimensions.get("window");
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -61,6 +61,12 @@ export function FeaturedVideoReel() {
     videoUrl = active.videoPath;
   }
 
+  const player = useVideoPlayer(videoUrl, (player) => {
+    player.loop = true;
+    player.muted = true;
+    player.play();
+  });
+
   return (
     <View style={styles.container}>
       {Platform.OS === "web" ? (
@@ -73,9 +79,13 @@ export function FeaturedVideoReel() {
           playsInline
         />
       ) : (
-        <View style={styles.videoPlaceholder}>
-          <ThemedText type="body">Premium Video Available in Web View</ThemedText>
-        </View>
+        <VideoView
+          style={styles.videoNative}
+          player={player}
+          nativeControls={false}
+          contentFit="cover"
+          pointerEvents="none"
+        />
       )}
 
       <LinearGradient
@@ -126,20 +136,17 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.dark.glassBorder,
   },
+  videoNative: {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+  },
   videoWeb: {
     width: "100%",
     height: "100%",
     position: "absolute",
     objectFit: "cover",
   } as any,
-  videoPlaceholder: {
-    width: "100%",
-    height: "100%",
-    backgroundColor: "#2a2a2a",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: Spacing.lg,
-  },
   overlay: {
     position: "absolute",
     top: 0,
