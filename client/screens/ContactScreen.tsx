@@ -38,7 +38,7 @@ export default function ContactScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <ThemedText type="body" style={styles.subtitle}>Have questions? We're here to help.</ThemedText>
+        <ThemedText type="body" style={styles.subtitle}>Have questions? We're here to help. Contact us at admin@cerolauto.com</ThemedText>
         <GlassCard style={styles.inputCard}>
           <ThemedText type="small" style={styles.label}>Email</ThemedText>
           <TextInput

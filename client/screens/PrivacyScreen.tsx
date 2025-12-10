@@ -53,7 +53,7 @@ export default function PrivacyScreen() {
         <GlassCard style={styles.section}>
           <ThemedText type="h4" style={styles.subheading}>Contact Us</ThemedText>
           <ThemedText type="body" style={styles.text}>
-            If you have any questions about our privacy practices, please contact us at privacy@luxdetailer.com
+            If you have any questions about our privacy practices, please contact us at admin@cerolauto.com
           </ThemedText>
         </GlassCard>
       </ScrollView>
