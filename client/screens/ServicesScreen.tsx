@@ -1,5 +1,5 @@
-import React from "react";
-import { ScrollView, View, StyleSheet, ActivityIndicator } from "react-native";
+import React, { useState } from "react";
+import { ScrollView, View, StyleSheet, ActivityIndicator, Pressable } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
@@ -17,6 +17,14 @@ import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { ServicesStackParamList } from "@/navigation/ServicesStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<ServicesStackParamList>;
+
+const CATEGORIES = [
+  { id: "all", name: "All Services", icon: "grid" },
+  { id: "exterior", name: "Exterior", icon: "droplet" },
+  { id: "interior", name: "Interior", icon: "wind" },
+  { id: "premium", name: "Premium", icon: "star" },
+  { id: "protection", name: "Protection", icon: "shield" },
+];
 
 interface Service {
   id: string;
@@ -58,14 +66,32 @@ export default function ServicesScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<NavigationProp>();
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [mascotMessage, setMascotMessage] = useState("Explore our premium detailing services!");
 
   const { data: services = [], isLoading } = useQuery<Service[]>({
     queryKey: ["/api/services"],
   });
 
+  const filteredServices = selectedCategory === "all" 
+    ? services 
+    : services.filter(s => s.category === selectedCategory);
+
   const handleServicePress = (serviceId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate("ServiceDetails", { serviceId });
+  };
+
+  const handleCategoryPress = (categoryId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedCategory(categoryId);
+    const category = CATEGORIES.find(c => c.id === categoryId);
+    setMascotMessage(`Showing ${category?.name.toLowerCase()}...`);
+  };
+
+  const handleMascotPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setMascotMessage("Tap a service to see details and book!");
   };
 
   if (isLoading) {
@@ -103,7 +129,52 @@ export default function ServicesScreen() {
           Professional detailing services for your vehicle
         </ThemedText>
 
-        {services.map((service) => {
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoriesScroll}
+          style={styles.categoriesContainer}
+        >
+          {CATEGORIES.map((category) => (
+            <Pressable
+              key={category.id}
+              onPress={() => handleCategoryPress(category.id)}
+              style={[
+                styles.categoryTab,
+                selectedCategory === category.id && styles.categoryTabActive,
+              ]}
+            >
+              <Feather 
+                name={category.icon as any} 
+                size={18} 
+                color={selectedCategory === category.id ? Colors.dark.accent : Colors.dark.textSecondary}
+                style={styles.categoryIcon}
+              />
+              <ThemedText 
+                type="small"
+                style={[
+                  styles.categoryLabel,
+                  selectedCategory === category.id && styles.categoryLabelActive,
+                ]}
+              >
+                {category.name}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </ScrollView>
+
+        {filteredServices.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Feather name="inbox" size={48} color={Colors.dark.textSecondary} />
+            <ThemedText type="h3" style={styles.emptyTitle}>
+              No services found
+            </ThemedText>
+            <ThemedText type="small" style={styles.emptySubtitle}>
+              Try selecting a different category
+            </ThemedText>
+          </View>
+        ) : (
+          filteredServices.map((service) => {
           const features = parseFeatures(service.features);
           const icon = CATEGORY_ICONS[service.category] || "star";
           
@@ -157,12 +228,14 @@ export default function ServicesScreen() {
               </View>
             </GlassCard>
           );
-        })}
+          })
+        )}
       </ScrollView>
 
       <FloatingMascot 
-        message="Need help choosing a service?"
+        message={mascotMessage}
         bottomOffset={tabBarHeight + Spacing.lg}
+        onPress={handleMascotPress}
       />
     </View>
   );
@@ -188,7 +261,51 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     opacity: 0.7,
+    marginBottom: Spacing.lg,
+  },
+  categoriesContainer: {
     marginBottom: Spacing.xl,
+  },
+  categoriesScroll: {
+    paddingRight: Spacing.lg,
+    marginLeft: -Spacing.lg,
+    paddingLeft: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  categoryTab: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.dark.backgroundSecondary,
+    marginRight: Spacing.sm,
+  },
+  categoryTabActive: {
+    backgroundColor: "rgba(10, 132, 255, 0.2)",
+    borderWidth: 1,
+    borderColor: Colors.dark.accent,
+  },
+  categoryIcon: {
+    marginRight: Spacing.xs,
+  },
+  categoryLabel: {
+    color: Colors.dark.textSecondary,
+  },
+  categoryLabelActive: {
+    color: Colors.dark.accent,
+    fontWeight: "600",
+  },
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: Spacing.xxl,
+  },
+  emptyTitle: {
+    marginTop: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  emptySubtitle: {
+    color: Colors.dark.textSecondary,
   },
   serviceCard: {
     marginBottom: Spacing.md,
