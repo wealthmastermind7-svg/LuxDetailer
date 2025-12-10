@@ -1,5 +1,5 @@
-import React from "react";
-import { ScrollView, View, StyleSheet, ActivityIndicator } from "react-native";
+import React, { useState } from "react";
+import { ScrollView, View, StyleSheet, ActivityIndicator, Pressable } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
@@ -7,15 +7,17 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
 import { FloatingMascot } from "@/components/FloatingMascot";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { BookingsStackParamList } from "@/navigation/BookingsStackNavigator";
+import { apiRequest } from "@/lib/query-client";
 
 type NavigationProp = NativeStackNavigationProp<BookingsStackParamList>;
+type TabType = "all" | "upcoming" | "past" | "cancelled";
 
 type BookingStatus = "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled";
 
@@ -86,9 +88,11 @@ function formatDate(dateStr: string): string {
 }
 
 export default function BookingsScreen() {
+  const [activeTab, setActiveTab] = useState<TabType>("upcoming");
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<NavigationProp>();
+  const queryClient = useQueryClient();
 
   const { data: bookings = [], isLoading: bookingsLoading } = useQuery<ApiBooking[]>({
     queryKey: ["/api/bookings"],
@@ -96,6 +100,15 @@ export default function BookingsScreen() {
 
   const { data: services = [], isLoading: servicesLoading } = useQuery<Service[]>({
     queryKey: ["/api/services"],
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: (bookingId: string) => 
+      apiRequest(`/api/bookings/${bookingId}/cancel`, { method: "PATCH" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/bookings"] });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    },
   });
 
   const isLoading = bookingsLoading || servicesLoading;
@@ -115,14 +128,43 @@ export default function BookingsScreen() {
 
   const upcomingBookings = displayBookings.filter(b => b.status !== "completed" && b.status !== "cancelled");
   const pastBookings = displayBookings.filter(b => b.status === "completed");
+  const cancelledBookings = displayBookings.filter(b => b.status === "cancelled");
+
+  const getFilteredBookings = () => {
+    switch (activeTab) {
+      case "all":
+        return displayBookings;
+      case "upcoming":
+        return upcomingBookings;
+      case "past":
+        return pastBookings;
+      case "cancelled":
+        return cancelledBookings;
+      default:
+        return upcomingBookings;
+    }
+  };
+
+  const filteredBookings = getFilteredBookings();
 
   const handleBookingPress = (bookingId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate("BookingDetails", { bookingId });
   };
 
+  const handleCancelBooking = (bookingId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    cancelMutation.mutate(bookingId);
+  };
+
+  const handleNewBooking = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate("BookingFlow");
+  };
+
   const renderBookingCard = (booking: DisplayBooking, showTimeline: boolean = false) => {
     const status = STATUS_CONFIG[booking.status] || STATUS_CONFIG.scheduled;
+    const canCancel = booking.status !== "completed" && booking.status !== "cancelled";
     
     return (
       <View key={booking.id} style={styles.timelineItem}>
@@ -132,48 +174,60 @@ export default function BookingsScreen() {
             <View style={styles.timelineLine} />
           </View>
         ) : null}
-        <GlassCard
-          onPress={() => handleBookingPress(booking.id)}
-          style={[styles.bookingCard, showTimeline && styles.bookingCardTimeline]}
-        >
-          <View style={styles.bookingHeader}>
-            <View style={styles.bookingInfo}>
-              <ThemedText type="h4">{booking.service}</ThemedText>
-              <ThemedText type="small" style={styles.bookingDate}>
-                {booking.date} at {booking.time}
-              </ThemedText>
-            </View>
-            <View style={[styles.statusBadge, { backgroundColor: `${status.color}20` }]}>
-              <Feather name={status.icon as any} size={14} color={status.color} />
-              <ThemedText type="caption" style={[styles.statusText, { color: status.color }]}>
-                {status.label}
-              </ThemedText>
-            </View>
-          </View>
-          
-          {booking.status === "in_progress" ? (
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBar}>
-                <View 
-                  style={[
-                    styles.progressFill, 
-                    { width: `${booking.progress}%`, backgroundColor: status.color }
-                  ]} 
-                />
+        <View style={styles.bookingCardWrapper}>
+          <GlassCard
+            onPress={() => handleBookingPress(booking.id)}
+            style={[styles.bookingCard, showTimeline && styles.bookingCardTimeline]}
+          >
+            <View style={styles.bookingHeader}>
+              <View style={styles.bookingInfo}>
+                <ThemedText type="h4">{booking.service}</ThemedText>
+                <ThemedText type="small" style={styles.bookingDate}>
+                  {booking.date} at {booking.time}
+                </ThemedText>
               </View>
-              <ThemedText type="caption" style={styles.progressText}>
-                {booking.progress}% Complete
-              </ThemedText>
+              <View style={[styles.statusBadge, { backgroundColor: `${status.color}20` }]}>
+                <Feather name={status.icon as any} size={14} color={status.color} />
+                <ThemedText type="caption" style={[styles.statusText, { color: status.color }]}>
+                  {status.label}
+                </ThemedText>
+              </View>
             </View>
-          ) : null}
+            
+            {booking.status === "in_progress" ? (
+              <View style={styles.progressContainer}>
+                <View style={styles.progressBar}>
+                  <View 
+                    style={[
+                      styles.progressFill, 
+                      { width: `${booking.progress}%`, backgroundColor: status.color }
+                    ]} 
+                  />
+                </View>
+                <ThemedText type="caption" style={styles.progressText}>
+                  {booking.progress}% Complete
+                </ThemedText>
+              </View>
+            ) : null}
+            
+            <View style={styles.bookingFooter}>
+              <ThemedText type="price" style={styles.bookingPrice}>
+                ${booking.price}
+              </ThemedText>
+              <Feather name="chevron-right" size={20} color={Colors.dark.textSecondary} />
+            </View>
+          </GlassCard>
           
-          <View style={styles.bookingFooter}>
-            <ThemedText type="price" style={styles.bookingPrice}>
-              ${booking.price}
-            </ThemedText>
-            <Feather name="chevron-right" size={20} color={Colors.dark.textSecondary} />
-          </View>
-        </GlassCard>
+          {canCancel ? (
+            <Pressable
+              onPress={() => handleCancelBooking(booking.id)}
+              style={styles.cancelButton}
+            >
+              <Feather name="x" size={16} color={Colors.dark.textSecondary} />
+              <ThemedText type="caption" style={styles.cancelButtonText}>Cancel</ThemedText>
+            </Pressable>
+          ) : null}
+        </View>
       </View>
     );
   };
@@ -185,6 +239,13 @@ export default function BookingsScreen() {
       </View>
     );
   }
+
+  const tabs: Array<{ id: TabType; label: string; count: number }> = [
+    { id: "all", label: "All", count: displayBookings.length },
+    { id: "upcoming", label: "Upcoming", count: upcomingBookings.length },
+    { id: "past", label: "Past", count: pastBookings.length },
+    { id: "cancelled", label: "Cancelled", count: cancelledBookings.length },
+  ];
 
   return (
     <View style={styles.container}>
@@ -204,41 +265,75 @@ export default function BookingsScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {upcomingBookings.length > 0 ? (
-          <View style={styles.section}>
-            <ThemedText type="h3" style={styles.sectionTitle}>
-              Upcoming
-            </ThemedText>
-            {upcomingBookings.map((booking) => renderBookingCard(booking, true))}
-          </View>
-        ) : null}
+        {/* Tab Navigation */}
+        <View style={styles.tabsContainer}>
+          {tabs.map((tab) => (
+            <Pressable
+              key={tab.id}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setActiveTab(tab.id);
+              }}
+              style={[
+                styles.tab,
+                activeTab === tab.id && styles.tabActive,
+              ]}
+            >
+              <ThemedText
+                type="small"
+                style={[
+                  styles.tabLabel,
+                  activeTab === tab.id && styles.tabLabelActive,
+                ]}
+              >
+                {tab.label}
+              </ThemedText>
+              {tab.count > 0 && (
+                <View style={[styles.badge, activeTab === tab.id && styles.badgeActive]}>
+                  <ThemedText type="caption" style={styles.badgeText}>
+                    {tab.count}
+                  </ThemedText>
+                </View>
+              )}
+            </Pressable>
+          ))}
+        </View>
 
-        {pastBookings.length > 0 ? (
+        {/* Bookings List */}
+        {filteredBookings.length > 0 ? (
           <View style={styles.section}>
-            <ThemedText type="h3" style={styles.sectionTitle}>
-              Past Bookings
-            </ThemedText>
-            {pastBookings.map((booking) => renderBookingCard(booking, false))}
+            {filteredBookings.map((booking) => renderBookingCard(booking, activeTab === "upcoming"))}
           </View>
-        ) : null}
-
-        {displayBookings.length === 0 ? (
+        ) : (
           <View style={styles.emptyState}>
             <View style={styles.emptyIcon}>
               <Feather name="calendar" size={48} color={Colors.dark.textSecondary} />
             </View>
             <ThemedText type="h3" style={styles.emptyTitle}>
-              No Bookings Yet
+              {activeTab === "all" ? "No Bookings Yet" : `No ${tabs.find(t => t.id === activeTab)?.label} Bookings`}
             </ThemedText>
             <ThemedText type="body" style={styles.emptyText}>
-              Book your first detailing service to get started
+              {activeTab === "all" || activeTab === "upcoming"
+                ? "Book your first detailing service to get started"
+                : `You don't have any ${activeTab} bookings`}
             </ThemedText>
+            {(activeTab === "all" || activeTab === "upcoming") && (
+              <Pressable
+                onPress={handleNewBooking}
+                style={styles.bookNowButton}
+              >
+                <Feather name="plus" size={18} color={Colors.dark.background} />
+                <ThemedText type="small" style={styles.bookNowButtonText}>
+                  Book Now
+                </ThemedText>
+              </Pressable>
+            )}
           </View>
-        ) : null}
+        )}
       </ScrollView>
 
       <FloatingMascot 
-        message="Tap any booking for details"
+        message={`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} bookings`}
         bottomOffset={tabBarHeight + Spacing.lg}
       />
     </View>
@@ -259,6 +354,46 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: Spacing.lg,
+  },
+  tabsContainer: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+    paddingHorizontal: 0,
+  },
+  tab: {
+    flex: 1,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 2,
+    borderBottomColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabActive: {
+    borderBottomColor: Colors.dark.accent,
+  },
+  tabLabel: {
+    fontWeight: "500",
+    opacity: 0.6,
+  },
+  tabLabelActive: {
+    opacity: 1,
+    color: Colors.dark.accent,
+  },
+  badge: {
+    marginTop: Spacing.xs,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.xs,
+    backgroundColor: Colors.dark.backgroundSecondary,
+  },
+  badgeActive: {
+    backgroundColor: Colors.dark.accent,
+  },
+  badgeText: {
+    color: Colors.dark.text,
+    fontWeight: "600",
   },
   section: {
     marginBottom: Spacing.xl,
@@ -285,6 +420,9 @@ const styles = StyleSheet.create({
     width: 2,
     backgroundColor: Colors.dark.backgroundSecondary,
     marginTop: Spacing.xs,
+  },
+  bookingCardWrapper: {
+    flex: 1,
   },
   bookingCard: {
     flex: 1,
@@ -344,6 +482,21 @@ const styles = StyleSheet.create({
   bookingPrice: {
     color: Colors.dark.accent,
   },
+  cancelButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    marginTop: Spacing.sm,
+    borderRadius: BorderRadius.xs,
+    backgroundColor: Colors.dark.backgroundSecondary,
+  },
+  cancelButtonText: {
+    color: Colors.dark.textSecondary,
+    fontWeight: "500",
+  },
   emptyState: {
     alignItems: "center",
     paddingVertical: Spacing.xxl,
@@ -363,5 +516,20 @@ const styles = StyleSheet.create({
   emptyText: {
     opacity: 0.6,
     textAlign: "center",
+    marginBottom: Spacing.lg,
+  },
+  bookNowButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.dark.accent,
+  },
+  bookNowButtonText: {
+    color: Colors.dark.background,
+    fontWeight: "600",
   },
 });
