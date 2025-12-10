@@ -285,6 +285,18 @@ export default function ProfileScreen() {
 
         <GlassCard style={styles.menuSection}>
           <ThemedText type="caption" style={styles.menuSectionTitle}>
+            BUSINESS
+          </ThemedText>
+          <MenuItem 
+            icon="list" 
+            label="All Bookings" 
+            value="View all customer bookings"
+            onPress={() => navigation.navigate("AllBookings")}
+          />
+        </GlassCard>
+
+        <GlassCard style={styles.menuSection}>
+          <ThemedText type="caption" style={styles.menuSectionTitle}>
             SUPPORT
           </ThemedText>
           <MenuItem 
@@ -326,7 +338,7 @@ export default function ProfileScreen() {
         </GlassCard>
 
         <ThemedText type="caption" style={styles.version}>
-          DetailProX v1.0.0
+          LuxDetailer v1.0.0
         </ThemedText>
       </ScrollView>
 

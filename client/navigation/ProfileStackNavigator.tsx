@@ -7,6 +7,7 @@ import ContactScreen from "@/screens/ContactScreen";
 import PrivacyScreen from "@/screens/PrivacyScreen";
 import TermsScreen from "@/screens/TermsScreen";
 import ChangePasswordScreen from "@/screens/ChangePasswordScreen";
+import AllBookingsScreen from "@/screens/AllBookingsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { Colors } from "@/constants/theme";
 
@@ -18,6 +19,7 @@ export type ProfileStackParamList = {
   Privacy: undefined;
   Terms: undefined;
   ChangePassword: undefined;
+  AllBookings: undefined;
 };
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
@@ -69,6 +71,11 @@ export default function ProfileStackNavigator() {
         name="ChangePassword"
         component={ChangePasswordScreen}
         options={{ headerTitle: "Change Password" }}
+      />
+      <Stack.Screen
+        name="AllBookings"
+        component={AllBookingsScreen}
+        options={{ headerTitle: "All Bookings" }}
       />
     </Stack.Navigator>
   );
