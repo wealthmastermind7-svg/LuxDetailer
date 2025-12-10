@@ -224,18 +224,18 @@ export default function ProfileScreen() {
             icon="phone" 
             label="Phone Number" 
             value={USER.phone}
-            onPress={() => {}}
+            onPress={() => navigation.navigate("Settings")}
           />
           <MenuItem 
             icon="mail" 
             label="Email Address" 
             value={USER.email}
-            onPress={() => {}}
+            onPress={() => navigation.navigate("Settings")}
           />
           <MenuItem 
             icon="lock" 
             label="Change Password" 
-            onPress={() => {}}
+            onPress={() => navigation.navigate("ChangePassword")}
           />
         </GlassCard>
 
@@ -290,22 +290,22 @@ export default function ProfileScreen() {
           <MenuItem 
             icon="help-circle" 
             label="Help Center" 
-            onPress={() => {}}
+            onPress={() => navigation.navigate("Help")}
           />
           <MenuItem 
             icon="message-circle" 
             label="Contact Us" 
-            onPress={() => {}}
+            onPress={() => navigation.navigate("Contact")}
           />
           <MenuItem 
             icon="file-text" 
             label="Terms of Service" 
-            onPress={() => {}}
+            onPress={() => navigation.navigate("Terms")}
           />
           <MenuItem 
             icon="shield" 
             label="Privacy Policy" 
-            onPress={() => {}}
+            onPress={() => navigation.navigate("Privacy")}
           />
         </GlassCard>
 
