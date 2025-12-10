@@ -393,7 +393,7 @@ export default function BookingFlowScreen() {
         {renderStepContent()}
       </KeyboardAwareScrollViewCompat>
 
-      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + Spacing.md }]}>
+      <View style={styles.bottomBar}>
         <LinearGradient
           colors={["transparent", "rgba(0,0,0,0.95)", "#000000"]}
           style={StyleSheet.absoluteFill}
@@ -605,11 +605,12 @@ const styles = StyleSheet.create({
   },
   bottomBar: {
     position: "absolute",
-    bottom: 0,
+    bottom: 75,
     left: 0,
     right: 0,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xl,
+    paddingBottom: Spacing.md,
     zIndex: 100,
   },
   buttonRow: {
