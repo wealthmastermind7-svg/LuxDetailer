@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "DetailProX",
-    "slug": "detailprox",
+    "name": "LuxDetailer",
+    "slug": "luxdetailer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "detailprox",
+    "scheme": "luxdetailer",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.detailprox.app"
+      "bundleIdentifier": "com.luxdetailer.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +19,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.detailprox.app"
+      "package": "com.luxdetailer.app"
     },
     "web": {
       "output": "single",

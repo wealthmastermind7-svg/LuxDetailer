@@ -25,7 +25,7 @@ export default function TermsScreen() {
         <GlassCard style={styles.section}>
           <ThemedText type="h3" style={styles.heading}>Terms of Service</ThemedText>
           <ThemedText type="body" style={styles.text}>
-            By using DetailProX, you agree to these terms and conditions. Please read them carefully.
+            By using LuxDetailer, you agree to these terms and conditions. Please read them carefully.
           </ThemedText>
         </GlassCard>
 
@@ -53,7 +53,7 @@ export default function TermsScreen() {
         <GlassCard style={styles.section}>
           <ThemedText type="h4" style={styles.subheading}>Limitation of Liability</ThemedText>
           <ThemedText type="body" style={styles.text}>
-            DetailProX shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our services.
+            LuxDetailer shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our services.
           </ThemedText>
         </GlassCard>
       </ScrollView>

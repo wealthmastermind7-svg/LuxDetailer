@@ -25,7 +25,7 @@ export default function PrivacyScreen() {
         <GlassCard style={styles.section}>
           <ThemedText type="h3" style={styles.heading}>Privacy Policy</ThemedText>
           <ThemedText type="body" style={styles.text}>
-            DetailProX is committed to protecting your privacy. We collect and use your information only to provide our services and improve your experience.
+            LuxDetailer is committed to protecting your privacy. We collect and use your information only to provide our services and improve your experience.
           </ThemedText>
         </GlassCard>
 
@@ -53,7 +53,7 @@ export default function PrivacyScreen() {
         <GlassCard style={styles.section}>
           <ThemedText type="h4" style={styles.subheading}>Contact Us</ThemedText>
           <ThemedText type="body" style={styles.text}>
-            If you have any questions about our privacy practices, please contact us at privacy@detailprox.com
+            If you have any questions about our privacy practices, please contact us at privacy@luxdetailer.com
           </ThemedText>
         </GlassCard>
       </ScrollView>
