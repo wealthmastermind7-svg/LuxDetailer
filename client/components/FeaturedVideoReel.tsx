@@ -112,32 +112,23 @@ export function FeaturedVideoReel() {
 
       <Animated.View
         style={[styles.content, contentAnimatedStyle]}
-        entering={FadeIn.duration(500).springify()}
-        exiting={FadeOut.duration(300)}
+        entering={FadeIn.duration(200)}
+        exiting={FadeOut.duration(200)}
         key={`content-${activeIndex}`}
       >
-        <Animated.View
-          entering={SlideInDown.duration(600).springify()}
-          key={`title-${activeIndex}`}
-        >
+        <Animated.View key={`title-${activeIndex}`}>
           <ThemedText type="h2" style={[styles.title, { color: active.accent }]}>
             {active.title}
           </ThemedText>
         </Animated.View>
 
-        <Animated.View
-          entering={SlideInDown.delay(100).duration(600).springify()}
-          key={`subtitle-${activeIndex}`}
-        >
+        <Animated.View key={`subtitle-${activeIndex}`}>
           <ThemedText type="h4" style={styles.subtitle}>
             {active.subtitle}
           </ThemedText>
         </Animated.View>
 
-        <Animated.View
-          entering={SlideInDown.delay(200).duration(600).springify()}
-          key={`desc-${activeIndex}`}
-        >
+        <Animated.View key={`desc-${activeIndex}`}>
           <ThemedText type="body" style={styles.description}>
             {active.description}
           </ThemedText>
@@ -146,7 +137,6 @@ export function FeaturedVideoReel() {
 
       <Animated.View
         style={styles.indicators}
-        entering={FadeIn.duration(400)}
         key={`indicators-${activeIndex}`}
       >
         {FEATURED_VIDEOS.map((service, index) => (
@@ -159,7 +149,6 @@ export function FeaturedVideoReel() {
                 { backgroundColor: service.accent },
               ],
             ]}
-            entering={FadeIn.duration(300)}
           />
         ))}
       </Animated.View>
