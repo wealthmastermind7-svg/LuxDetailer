@@ -186,26 +186,26 @@ export default function ProfileScreen() {
 
         <View style={styles.statsContainer}>
           <GlassCard style={styles.statCard}>
-            <ThemedText type="h2" style={styles.statValue}>
+            <ThemedText type="h2" style={styles.statValue} numberOfLines={1}>
               {USER.bookings}
             </ThemedText>
-            <ThemedText type="caption" style={styles.statLabel}>
+            <ThemedText type="caption" style={styles.statLabel} numberOfLines={1}>
               Bookings
             </ThemedText>
           </GlassCard>
           <GlassCard style={styles.statCard}>
-            <ThemedText type="h2" style={styles.statValue}>
+            <ThemedText type="h2" style={styles.statValue} numberOfLines={1}>
               ${USER.totalSpent}
             </ThemedText>
-            <ThemedText type="caption" style={styles.statLabel}>
+            <ThemedText type="caption" style={styles.statLabel} numberOfLines={2}>
               Total Spent
             </ThemedText>
           </GlassCard>
           <GlassCard style={styles.statCard}>
-            <ThemedText type="h2" style={styles.statValue}>
+            <ThemedText type="h2" style={styles.statValue} numberOfLines={1}>
               Gold
             </ThemedText>
-            <ThemedText type="caption" style={styles.statLabel}>
+            <ThemedText type="caption" style={styles.statLabel} numberOfLines={1}>
               Member
             </ThemedText>
           </GlassCard>
@@ -396,16 +396,22 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     alignItems: "center",
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.sm,
+    justifyContent: "center",
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    minHeight: 120,
   },
   statValue: {
     color: Colors.dark.accent,
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.sm,
+    fontSize: 32,
+    fontWeight: "700",
   },
   statLabel: {
     opacity: 0.6,
     textAlign: "center",
+    fontSize: 12,
+    lineHeight: 16,
   },
   menuSection: {
     marginBottom: Spacing.md,
