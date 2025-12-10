@@ -6,7 +6,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { getApiUrl } from "@/lib/query-client";
 
-const SHOWCASE_VIDEO = "/videos/luxury_car_detailing_showcase.mp4";
+const SHOWCASE_VIDEO = "/videos/services_cinematic_montage.mp4";
 
 export function FeaturedVideoReel() {
   let videoUrl = "";
