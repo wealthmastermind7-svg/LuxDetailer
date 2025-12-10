@@ -104,7 +104,7 @@ export default function BookingsScreen() {
 
   const cancelMutation = useMutation({
     mutationFn: (bookingId: string) => 
-      apiRequest(`/api/bookings/${bookingId}/cancel`, { method: "PATCH" }),
+      apiRequest(`/api/bookings/${bookingId}/cancel`, "PATCH", {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/bookings"] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -181,13 +181,13 @@ export default function BookingsScreen() {
           >
             <View style={styles.bookingHeader}>
               <View style={styles.bookingInfo}>
-                <ThemedText type="h4">{booking.service}</ThemedText>
-                <ThemedText type="small" style={styles.bookingDate}>
-                  {booking.date} at {booking.time}
+                <ThemedText type="h3" style={{ fontWeight: "700", fontSize: 20, lineHeight: 24 }}>{booking.service}</ThemedText>
+                <ThemedText type="body" style={styles.bookingDate}>
+                  {booking.date} • {booking.time}
                 </ThemedText>
               </View>
-              <View style={[styles.statusBadge, { backgroundColor: `${status.color}20` }]}>
-                <Feather name={status.icon as any} size={14} color={status.color} />
+              <View style={[styles.statusBadge, { backgroundColor: `${status.color}15` }]}>
+                <Feather name={status.icon as any} size={13} color={status.color} />
                 <ThemedText type="caption" style={[styles.statusText, { color: status.color }]}>
                   {status.label}
                 </ThemedText>
@@ -322,7 +322,7 @@ export default function BookingsScreen() {
                 onPress={handleNewBooking}
                 style={styles.bookNowButton}
               >
-                <Feather name="plus" size={18} color={Colors.dark.background} />
+                <Feather name="plus" size={18} color={Colors.dark.backgroundDefault} />
                 <ThemedText type="small" style={styles.bookNowButtonText}>
                   Book Now
                 </ThemedText>
@@ -357,29 +357,32 @@ const styles = StyleSheet.create({
   },
   tabsContainer: {
     flexDirection: "row",
-    gap: Spacing.sm,
-    marginBottom: Spacing.lg,
+    gap: Spacing.md,
+    marginBottom: Spacing.xl,
     paddingHorizontal: 0,
   },
   tab: {
     flex: 1,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.lg,
     borderBottomWidth: 2,
     borderBottomColor: "transparent",
     alignItems: "center",
     justifyContent: "center",
+    minHeight: 56,
   },
   tabActive: {
     borderBottomColor: Colors.dark.accent,
   },
   tabLabel: {
-    fontWeight: "500",
+    fontWeight: "600",
     opacity: 0.6,
+    fontSize: 13,
   },
   tabLabelActive: {
     opacity: 1,
     color: Colors.dark.accent,
+    fontWeight: "700",
   },
   badge: {
     marginTop: Spacing.xs,
@@ -435,25 +438,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.lg,
+    gap: Spacing.md,
   },
   bookingInfo: {
     flex: 1,
   },
   bookingDate: {
-    opacity: 0.6,
-    marginTop: Spacing.xs,
+    opacity: 0.5,
+    marginTop: Spacing.sm,
+    fontSize: 13,
   },
   statusBadge: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.xs,
+    borderRadius: BorderRadius.sm,
     gap: Spacing.xs,
+    minHeight: 28,
+    justifyContent: "center",
   },
   statusText: {
-    fontWeight: "600",
+    fontWeight: "700",
+    fontSize: 11,
   },
   progressContainer: {
     marginBottom: Spacing.md,
@@ -475,12 +483,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: Spacing.md,
+    paddingTop: Spacing.lg,
+    marginTop: Spacing.lg,
     borderTopWidth: 1,
     borderTopColor: Colors.dark.glassBorder,
   },
   bookingPrice: {
     color: Colors.dark.accent,
+    fontWeight: "700",
+    fontSize: 18,
   },
   cancelButton: {
     flexDirection: "row",
@@ -529,7 +540,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.accent,
   },
   bookNowButtonText: {
-    color: Colors.dark.background,
+    color: Colors.dark.backgroundDefault,
     fontWeight: "600",
   },
 });
