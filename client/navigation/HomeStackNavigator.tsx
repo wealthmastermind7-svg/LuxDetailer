@@ -4,14 +4,18 @@ import HomeScreen from "@/screens/HomeScreen";
 import ServiceDetailsScreen from "@/screens/ServiceDetailsScreen";
 import BookingFlowScreen from "@/screens/BookingFlowScreen";
 import MyVehicleScreen from "@/screens/MyVehicleScreen";
+import ServicesScreen from "@/screens/ServicesScreen";
+import SettingsScreen from "@/screens/SettingsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { Colors } from "@/constants/theme";
 
 export type HomeStackParamList = {
   Home: undefined;
   ServiceDetails: { serviceId: string };
-  BookingFlow: { serviceId?: string } | undefined;
+  BookingFlow: { serviceId?: string; promoCode?: string } | undefined;
   MyVehicle: undefined;
+  Services: undefined;
+  Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -48,6 +52,16 @@ export default function HomeStackNavigator() {
         name="MyVehicle"
         component={MyVehicleScreen}
         options={{ headerTitle: "My Vehicle" }}
+      />
+      <Stack.Screen
+        name="Services"
+        component={ServicesScreen}
+        options={{ headerTitle: "All Services" }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ headerTitle: "Settings" }}
       />
     </Stack.Navigator>
   );

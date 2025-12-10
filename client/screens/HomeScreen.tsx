@@ -51,6 +51,26 @@ export default function HomeScreen() {
     navigation.navigate("MyVehicle");
   };
 
+  const handleNotifications = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate("Settings");
+  };
+
+  const handleSeeAllServices = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate("Services");
+  };
+
+  const handlePromoPress = (promoCode: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    navigation.navigate("BookingFlow", { promoCode });
+  };
+
+  const handleRewardsPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setMascotMessage("Rewards program coming soon!");
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -72,9 +92,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <HeaderTitle />
           <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }}
+            onPress={handleNotifications}
             style={styles.notificationButton}
           >
             <Feather name="bell" size={24} color={Colors.dark.text} />
@@ -122,7 +140,7 @@ export default function HomeScreen() {
             </ThemedText>
           </GlassCard>
           
-          <GlassCard style={styles.quickActionCard}>
+          <GlassCard onPress={handleRewardsPress} style={styles.quickActionCard}>
             <Feather name="gift" size={28} color={Colors.dark.accentGreen} />
             <ThemedText type="small" style={styles.quickActionLabel}>
               Rewards
@@ -132,7 +150,7 @@ export default function HomeScreen() {
 
         <View style={styles.sectionHeader}>
           <ThemedText type="h3">Popular Services</ThemedText>
-          <Pressable onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}>
+          <Pressable onPress={handleSeeAllServices}>
             <ThemedText type="link">See All</ThemedText>
           </Pressable>
         </View>
@@ -169,7 +187,11 @@ export default function HomeScreen() {
         </View>
 
         {PROMOTIONS.map((promo) => (
-          <GlassCard key={promo.id} style={styles.promoCard}>
+          <GlassCard 
+            key={promo.id} 
+            style={styles.promoCard}
+            onPress={() => handlePromoPress(promo.id)}
+          >
             <View style={styles.promoContent}>
               <View>
                 <ThemedText type="h4">{promo.title}</ThemedText>
