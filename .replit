@@ -1,5 +1,5 @@
 entrypoint = "README.md"
-modules = ["nodejs-22"]
+modules = ["nodejs-22", "postgresql-16"]
 
 [nix]
 channel = "stable-24_05"
@@ -22,12 +22,16 @@ localPort = 8082
 externalPort = 3001
 
 [[ports]]
+localPort = 35087
+externalPort = 3002
+
+[[ports]]
 localPort = 40131
 externalPort = 3000
 
 [[ports]]
 localPort = 43095
-externalPort = 3002
+externalPort = 3003
 
 [env]
 PORT = "5000"
