@@ -56,7 +56,7 @@ export function FeaturedVideoReel() {
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % FEATURED_VIDEOS.length);
-    }, 8000);
+    }, 12000);
     return () => clearInterval(interval);
   }, []);
 
