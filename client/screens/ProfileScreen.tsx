@@ -96,6 +96,9 @@ export default function ProfileScreen() {
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [marketingEnabled, setMarketingEnabled] = useState(false);
+  
+  // For demo: business owner mode. In production, fetch from auth context/backend
+  const isBusinessOwner = true; // TODO: Replace with role check from user auth context
 
   const handleLogout = () => {
     Alert.alert(
@@ -283,17 +286,19 @@ export default function ProfileScreen() {
           />
         </GlassCard>
 
-        <GlassCard style={styles.menuSection}>
-          <ThemedText type="caption" style={styles.menuSectionTitle}>
-            BUSINESS
-          </ThemedText>
-          <MenuItem 
-            icon="list" 
-            label="All Bookings" 
-            value="View all customer bookings"
-            onPress={() => navigation.navigate("AllBookings")}
-          />
-        </GlassCard>
+        {isBusinessOwner && (
+          <GlassCard style={styles.menuSection}>
+            <ThemedText type="caption" style={styles.menuSectionTitle}>
+              BUSINESS
+            </ThemedText>
+            <MenuItem 
+              icon="list" 
+              label="All Bookings" 
+              value="View all customer bookings"
+              onPress={() => navigation.navigate("AllBookings")}
+            />
+          </GlassCard>
+        )}
 
         <GlassCard style={styles.menuSection}>
           <ThemedText type="caption" style={styles.menuSectionTitle}>
