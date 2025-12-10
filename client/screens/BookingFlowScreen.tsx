@@ -395,7 +395,7 @@ export default function BookingFlowScreen() {
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + Spacing.md }]}>
         <LinearGradient
-          colors={["transparent", "rgba(0,0,0,0.9)", "#000000"]}
+          colors={["transparent", "rgba(0,0,0,0.95)", "#000000"]}
           style={StyleSheet.absoluteFill}
         />
         <View style={styles.buttonRow}>
@@ -407,7 +407,11 @@ export default function BookingFlowScreen() {
           <Button 
             onPress={handleNext} 
             disabled={!canProceed() || createBookingMutation.isPending}
-            style={[styles.nextButton, currentStep === 0 && styles.nextButtonFull]}
+            style={[
+              styles.nextButton, 
+              currentStep === 0 && styles.nextButtonFull,
+              canProceed() && styles.nextButtonActive
+            ]}
           >
             {createBookingMutation.isPending 
               ? "Booking..." 
@@ -626,5 +630,12 @@ const styles = StyleSheet.create({
   },
   nextButtonFull: {
     flex: 1,
+  },
+  nextButtonActive: {
+    shadowColor: Colors.dark.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12,
+    elevation: 10,
   },
 });
