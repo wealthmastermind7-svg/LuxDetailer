@@ -610,11 +610,14 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xl,
+    zIndex: 100,
   },
   buttonRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     gap: Spacing.md,
+    minHeight: 70,
   },
   backButton: {
     width: 56,
@@ -626,6 +629,7 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     flex: 1,
+    minHeight: 56,
     ...Shadows.glow,
   },
   nextButtonFull: {
