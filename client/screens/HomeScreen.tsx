@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ScrollView, View, StyleSheet, Image, Pressable } from "react-native";
+import { ScrollView, View, StyleSheet, Image, Pressable, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
@@ -18,18 +19,36 @@ import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
 
-const SERVICES = [
-  { id: "1", name: "Express Exterior", icon: "wind", price: 95, duration: "30-40m" },
-  { id: "2", name: "Gold Wash", icon: "droplet", price: 145, duration: "55-70m" },
-  { id: "3", name: "Platinum Wash", icon: "shield", price: 225, duration: "90-120m" },
-  { id: "4", name: "Scratch Removal", icon: "zap", price: 260, duration: "70-90m" },
-  { id: "5", name: "Interior Detail", icon: "home", price: 350, duration: "80-100m" },
-  { id: "6", name: "Deluxe Detail", icon: "star", price: 415, duration: "150-180m" },
-  { id: "7", name: "Signature Detail", icon: "heart", price: 625, duration: "200-240m" },
-  { id: "8", name: "Diamond Ceramic", icon: "award", price: 1045, duration: "300-360m" },
-  { id: "9", name: "Window Tinting", icon: "grid", price: 1045, duration: "200-240m" },
-  { id: "10", name: "Titanium Gloss", icon: "sun", price: 1680, duration: "200-240m" },
-].sort((a, b) => a.price - b.price);
+interface Service {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  price: string;
+  duration: number;
+  imageUrl: string | null;
+  features: string | null;
+  isActive: boolean | null;
+}
+
+const CATEGORY_ICONS: Record<string, string> = {
+  exterior: "droplet",
+  interior: "wind",
+  premium: "star",
+  protection: "shield",
+};
+
+function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (mins === 0) return `${hours} hour${hours > 1 ? "s" : ""}`;
+  return `${hours}h ${mins}m`;
+}
+
+function getServiceIcon(category: string): string {
+  return CATEGORY_ICONS[category] || "star";
+}
 
 const PROMOTIONS = [
   { id: "1", title: "First Time Special", discount: "20% OFF", description: "New customers" },
@@ -41,6 +60,12 @@ export default function HomeScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<NavigationProp>();
   const [mascotMessage, setMascotMessage] = useState("Welcome! Tap to book your first detail.");
+  
+  const { data: services = [] } = useQuery<Service[]>({
+    queryKey: ["/api/services"],
+  });
+  
+  const popularServices = services.slice(0, 3).sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
 
   const handleServicePress = (serviceId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -166,26 +191,32 @@ export default function HomeScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.servicesScroll}
         >
-          {SERVICES.map((service) => (
-            <GlassCard
-              key={service.id}
-              onPress={() => handleServicePress(service.id)}
-              style={styles.serviceCard}
-            >
-              <View style={styles.serviceIconContainer}>
-                <Feather name={service.icon as any} size={24} color={Colors.dark.accent} />
-              </View>
-              <ThemedText type="h4" style={styles.serviceName}>
-                {service.name}
-              </ThemedText>
-              <ThemedText type="caption" style={styles.serviceDuration}>
-                {service.duration}
-              </ThemedText>
-              <ThemedText type="price" style={styles.servicePrice}>
-                ${service.price}
-              </ThemedText>
-            </GlassCard>
-          ))}
+          {popularServices.length === 0 ? (
+            <View style={[styles.serviceCard, { justifyContent: "center", alignItems: "center" }]}>
+              <ActivityIndicator size="large" color={Colors.dark.accent} />
+            </View>
+          ) : (
+            popularServices.map((service) => (
+              <GlassCard
+                key={service.id}
+                onPress={() => handleServicePress(service.id)}
+                style={styles.serviceCard}
+              >
+                <View style={styles.serviceIconContainer}>
+                  <Feather name={getServiceIcon(service.category) as any} size={24} color={Colors.dark.accent} />
+                </View>
+                <ThemedText type="h4" style={styles.serviceName}>
+                  {service.name}
+                </ThemedText>
+                <ThemedText type="caption" style={styles.serviceDuration}>
+                  {formatDuration(service.duration)}
+                </ThemedText>
+                <ThemedText type="price" style={styles.servicePrice}>
+                  ${service.price}
+                </ThemedText>
+              </GlassCard>
+            ))
+          )}
         </ScrollView>
 
         <View style={styles.sectionHeader}>
