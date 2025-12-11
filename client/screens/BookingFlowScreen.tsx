@@ -13,6 +13,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/Button";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
+import { FloatingMascot } from "@/components/FloatingMascot";
 import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { apiRequest } from "@/lib/query-client";
@@ -572,6 +573,11 @@ export default function BookingFlowScreen() {
           </Button>
         </View>
       </View>
+
+      <FloatingMascot 
+        message={STEPS[currentStep] === "Location" ? "Enter your work address to complete your booking" : undefined}
+        bottomOffset={140}
+      />
 
       <Modal
         visible={showLoginModal}
