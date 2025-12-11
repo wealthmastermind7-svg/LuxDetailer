@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { ScrollView, View, StyleSheet, Pressable, TextInput, ActivityIndicator, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,6 +18,7 @@ import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { apiRequest } from "@/lib/query-client";
 
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
+type RouteType = RouteProp<{ BookingFlow: { serviceId?: string; addOns?: string[]; totalPrice?: number } }, "BookingFlow">;
 
 interface Service {
   id: string;
@@ -31,12 +32,22 @@ interface Service {
   isActive: boolean | null;
 }
 
-const STEPS = ["Service", "Date", "Time", "Location", "Confirm"];
+const ALL_STEPS = ["Service", "Date", "Time", "Location", "Confirm"];
+const STEPS_WITHOUT_SERVICE = ["Date", "Time", "Location", "Confirm"];
 
 const TIME_SLOTS = [
   "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM",
   "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"
 ];
+
+const ADD_ON_NAMES: Record<string, { name: string; price: number }> = {
+  "1": { name: "Engine Bay Detail", price: 89 },
+  "2": { name: "Headlight Restoration", price: 79 },
+  "3": { name: "Wheel Ceramic Coating", price: 149 },
+  "4": { name: "Leather Protection", price: 99 },
+  "5": { name: "Odor Elimination", price: 49 },
+  "6": { name: "Pet Hair Removal", price: 59 },
+};
 
 function generateDates(): { day: string; date: string; month: string; fullDate: string }[] {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -61,10 +72,19 @@ export default function BookingFlowScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const navigation = useNavigation<NavigationProp>();
+  const route = useRoute<RouteType>();
   const queryClient = useQueryClient();
   
+  const preSelectedServiceId = route.params?.serviceId;
+  const preSelectedAddOns = route.params?.addOns || [];
+  const preSelectedTotalPrice = route.params?.totalPrice;
+  
+  const hasPreSelection = !!preSelectedServiceId;
+  const STEPS = hasPreSelection ? STEPS_WITHOUT_SERVICE : ALL_STEPS;
+  
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [selectedService, setSelectedService] = useState<string | null>(preSelectedServiceId || null);
+  const [selectedAddOns] = useState<string[]>(preSelectedAddOns);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedDateDisplay, setSelectedDateDisplay] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -77,6 +97,20 @@ export default function BookingFlowScreen() {
     queryKey: ["/api/services"],
   });
 
+  const calculatedTotalPrice = useMemo(() => {
+    if (preSelectedTotalPrice !== undefined) {
+      return preSelectedTotalPrice;
+    }
+    const service = services.find(s => s.id === selectedService);
+    if (!service) return 0;
+    const basePrice = parseFloat(service.price);
+    const addOnsTotal = selectedAddOns.reduce((total, addOnId) => {
+      const addOn = ADD_ON_NAMES[addOnId];
+      return total + (addOn?.price || 0);
+    }, 0);
+    return basePrice + addOnsTotal;
+  }, [preSelectedTotalPrice, services, selectedService, selectedAddOns]);
+
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData: {
       serviceId: string;
@@ -85,6 +119,7 @@ export default function BookingFlowScreen() {
       location: string;
       notes?: string;
       totalPrice: string;
+      addOns?: string;
     }) => {
       return apiRequest("POST", "/api/bookings", bookingData);
     },
@@ -107,15 +142,15 @@ export default function BookingFlowScreen() {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      const selectedServiceData = services.find(s => s.id === selectedService);
-      if (selectedServiceData && selectedDate && selectedTime) {
+      if (selectedService && selectedDate && selectedTime) {
         createBookingMutation.mutate({
-          serviceId: selectedService!,
+          serviceId: selectedService,
           date: selectedDate,
           time: selectedTime,
           location,
           notes: notes || undefined,
-          totalPrice: selectedServiceData.price,
+          totalPrice: calculatedTotalPrice.toFixed(2),
+          addOns: selectedAddOns.length > 0 ? JSON.stringify(selectedAddOns) : undefined,
         });
       }
     }
@@ -129,12 +164,13 @@ export default function BookingFlowScreen() {
   };
 
   const canProceed = () => {
-    switch (currentStep) {
-      case 0: return !!selectedService;
-      case 1: return !!selectedDate;
-      case 2: return !!selectedTime;
-      case 3: return location.length > 0;
-      case 4: return true;
+    const stepName = STEPS[currentStep];
+    switch (stepName) {
+      case "Service": return !!selectedService;
+      case "Date": return !!selectedDate;
+      case "Time": return !!selectedTime;
+      case "Location": return location.length > 0;
+      case "Confirm": return true;
       default: return false;
     }
   };
@@ -150,8 +186,10 @@ export default function BookingFlowScreen() {
   }
 
   const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
+    const stepName = STEPS[currentStep];
+    
+    switch (stepName) {
+      case "Service":
         return (
           <View style={styles.stepContent}>
             <ThemedText type="h2" style={styles.stepTitle}>
@@ -190,7 +228,7 @@ export default function BookingFlowScreen() {
           </View>
         );
 
-      case 1:
+      case "Date":
         return (
           <View style={styles.stepContent}>
             <ThemedText type="h2" style={styles.stepTitle}>
@@ -236,7 +274,7 @@ export default function BookingFlowScreen() {
           </View>
         );
 
-      case 2:
+      case "Time":
         return (
           <View style={styles.stepContent}>
             <ThemedText type="h2" style={styles.stepTitle}>
@@ -274,7 +312,7 @@ export default function BookingFlowScreen() {
           </View>
         );
 
-      case 3:
+      case "Location":
         return (
           <View style={styles.stepContent}>
             <ThemedText type="h2" style={styles.stepTitle}>
@@ -312,7 +350,8 @@ export default function BookingFlowScreen() {
           </View>
         );
 
-      case 4:
+      case "Confirm":
+        const basePrice = selectedServiceData ? parseFloat(selectedServiceData.price) : 0;
         return (
           <View style={styles.stepContent}>
             <ThemedText type="h2" style={styles.stepTitle}>
@@ -326,6 +365,21 @@ export default function BookingFlowScreen() {
                 <ThemedText type="body" style={styles.summaryLabel}>Service</ThemedText>
                 <ThemedText type="h4">{selectedServiceData?.name}</ThemedText>
               </View>
+              {selectedAddOns.length > 0 ? (
+                <View style={styles.addOnsSection}>
+                  <ThemedText type="body" style={styles.summaryLabel}>Add-Ons</ThemedText>
+                  {selectedAddOns.map((addOnId) => {
+                    const addOn = ADD_ON_NAMES[addOnId];
+                    if (!addOn) return null;
+                    return (
+                      <View key={addOnId} style={styles.addOnRow}>
+                        <ThemedText type="small" style={styles.addOnName}>{addOn.name}</ThemedText>
+                        <ThemedText type="small" style={styles.addOnPrice}>+${addOn.price}</ThemedText>
+                      </View>
+                    );
+                  })}
+                </View>
+              ) : null}
               <View style={styles.summaryRow}>
                 <ThemedText type="body" style={styles.summaryLabel}>Date</ThemedText>
                 <ThemedText type="h4">{selectedDateDisplay}</ThemedText>
@@ -339,10 +393,16 @@ export default function BookingFlowScreen() {
                 <ThemedText type="body" style={styles.summaryAddress}>{location}</ThemedText>
               </View>
               <View style={styles.summaryDivider} />
+              {selectedAddOns.length > 0 ? (
+                <View style={styles.summaryRow}>
+                  <ThemedText type="body" style={styles.summaryLabel}>Base Service</ThemedText>
+                  <ThemedText type="body">${basePrice.toFixed(0)}</ThemedText>
+                </View>
+              ) : null}
               <View style={styles.summaryRow}>
                 <ThemedText type="h4">Total</ThemedText>
                 <ThemedText type="price" style={styles.totalPrice}>
-                  ${selectedServiceData ? parseFloat(selectedServiceData.price).toFixed(0) : 0}
+                  ${calculatedTotalPrice.toFixed(0)}
                 </ThemedText>
               </View>
             </GlassCard>
@@ -594,6 +654,22 @@ const styles = StyleSheet.create({
     textAlign: "right",
     flex: 1,
     marginLeft: Spacing.lg,
+  },
+  addOnsSection: {
+    paddingVertical: Spacing.sm,
+  },
+  addOnRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: Spacing.xs,
+    paddingLeft: Spacing.md,
+  },
+  addOnName: {
+    opacity: 0.8,
+  },
+  addOnPrice: {
+    color: Colors.dark.accent,
   },
   summaryDivider: {
     height: 1,
