@@ -6,6 +6,7 @@ import {
   Platform,
   ViewStyle,
   StyleProp,
+  Text,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,6 +16,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import * as Haptics from "expo-haptics";
 
 interface TabBarProps {
   state: any;
@@ -89,18 +91,20 @@ function TabButton({ isFocused, onPress, options }: TabButtonProps) {
   const scale = useSharedValue(1);
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.95, {
-      damping: 15,
-      mass: 0.3,
-      stiffness: 150,
+    scale.value = withSpring(0.93, {
+      damping: 12,
+      mass: 0.25,
+      stiffness: 180,
     });
+    // Haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
   };
 
   const handlePressOut = () => {
     scale.value = withSpring(1, {
-      damping: 15,
-      mass: 0.3,
-      stiffness: 150,
+      damping: 12,
+      mass: 0.25,
+      stiffness: 180,
     });
   };
 
@@ -139,22 +143,21 @@ function TabButton({ isFocused, onPress, options }: TabButtonProps) {
       </View>
       {options.title && (
         <View style={styles.labelContainer}>
-          <View style={styles.labelText}>
-            {typeof options.title === "string" && (
-              <Animated.Text
-                style={[
-                  styles.label,
-                  {
-                    color: iconColor,
-                    fontSize: 11,
-                    fontWeight: isFocused ? "600" : "500",
-                  },
-                ]}
-              >
-                {options.title}
-              </Animated.Text>
-            )}
-          </View>
+          {typeof options.title === "string" && (
+            <Text
+              numberOfLines={1}
+              style={[
+                styles.label,
+                {
+                  color: iconColor,
+                  fontSize: 10,
+                  fontWeight: isFocused ? "600" : "500",
+                },
+              ]}
+            >
+              {options.title}
+            </Text>
+          )}
         </View>
       )}
     </AnimatedPressable>
@@ -181,7 +184,7 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     flex: 1,
-    maxWidth: 70,
+    maxWidth: 75,
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
@@ -196,7 +199,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.glassSurface,
     borderWidth: 1.5,
     borderColor: Colors.dark.glassBorder,
-    gap: Spacing.xs,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: Spacing.xs,
   },
   tabButtonInnerFocused: {
     backgroundColor: "rgba(10, 132, 255, 0.15)",
@@ -208,13 +212,9 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   labelContainer: {
-    position: "absolute",
-    bottom: 6,
-    width: "100%",
+    width: "90%",
     alignItems: "center",
-  },
-  labelText: {
-    alignItems: "center",
+    marginTop: 2,
   },
   label: {
     textAlign: "center",
