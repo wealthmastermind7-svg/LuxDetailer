@@ -388,7 +388,6 @@ export default function BookingFlowScreen() {
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     setSelectedLocationType(preset.id);
-                    setLocation("");
                   }}
                   style={({ pressed }) => [
                     styles.locationCard,
