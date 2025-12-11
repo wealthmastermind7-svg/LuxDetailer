@@ -69,12 +69,32 @@ export function GlassCard({
     shadowRadius: 12,
   } : {};
 
+  if (!onPress) {
+    return (
+      <View style={[styles.card, glowStyle, style]}>
+        {Platform.OS === "ios" ? (
+          <BlurView
+            intensity={Glass.blur}
+            tint="dark"
+            style={[styles.blurContainer, contentStyle]}
+          >
+            {children}
+          </BlurView>
+        ) : (
+          <View style={[styles.androidContainer, contentStyle]}>
+            {children}
+          </View>
+        )}
+      </View>
+    );
+  }
+
   return (
     <AnimatedPressable
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      disabled={disabled || !onPress}
+      disabled={disabled}
       style={[
         styles.card,
         glowStyle,
