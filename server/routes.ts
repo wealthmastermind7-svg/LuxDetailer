@@ -269,6 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const booking = await storage.createBooking(parsed.data);
       res.status(201).json(booking);
     } catch (error) {
+      console.error("Booking creation error:", error);
       res.status(500).json({ error: "Failed to create booking" });
     }
   });
