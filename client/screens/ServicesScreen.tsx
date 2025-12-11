@@ -73,9 +73,10 @@ export default function ServicesScreen() {
     queryKey: ["/api/services"],
   });
 
-  const filteredServices = selectedCategory === "all" 
+  const filteredServices = (selectedCategory === "all" 
     ? services 
-    : services.filter(s => s.category === selectedCategory);
+    : services.filter(s => s.category === selectedCategory)
+  ).sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
 
   const handleServicePress = (serviceId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
