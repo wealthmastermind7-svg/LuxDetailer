@@ -19,10 +19,16 @@ import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
 
 const SERVICES = [
-  { id: "1", name: "Full Detail", icon: "star", price: 299, duration: "4-5 hrs" },
-  { id: "2", name: "Ceramic Coating", icon: "shield", price: 899, duration: "8+ hrs" },
-  { id: "3", name: "Paint Correction", icon: "zap", price: 449, duration: "6-8 hrs" },
-  { id: "4", name: "Interior Clean", icon: "wind", price: 149, duration: "2-3 hrs" },
+  { id: "1", name: "Express Exterior", icon: "wind", price: 95, duration: "30-40m" },
+  { id: "2", name: "Gold Wash", icon: "droplet", price: 145, duration: "55-70m" },
+  { id: "3", name: "Platinum Wash", icon: "shield", price: 225, duration: "90-120m" },
+  { id: "4", name: "Scratch Removal", icon: "zap", price: 260, duration: "70-90m" },
+  { id: "5", name: "Interior Detail", icon: "home", price: 350, duration: "80-100m" },
+  { id: "6", name: "Deluxe Detail", icon: "star", price: 415, duration: "150-180m" },
+  { id: "7", name: "Signature Detail", icon: "heart", price: 625, duration: "200-240m" },
+  { id: "8", name: "Diamond Ceramic", icon: "gem", price: 1045, duration: "300-360m" },
+  { id: "9", name: "Titanium Gloss", icon: "sparkles", price: 1680, duration: "200-240m" },
+  { id: "10", name: "Window Tinting", icon: "square", price: 1045, duration: "200-240m" },
 ];
 
 const PROMOTIONS = [
