@@ -125,7 +125,7 @@ export default function HomeScreen() {
         <View style={styles.quickActions}>
           <GlassCard onPress={handleMyVehicle} style={styles.quickActionCard}>
             <Feather name="truck" size={28} color={Colors.dark.accent} />
-            <ThemedText type="small" style={styles.quickActionLabel}>
+            <ThemedText type="small" style={styles.quickActionLabel} numberOfLines={1}>
               My Vehicle
             </ThemedText>
           </GlassCard>
@@ -135,14 +135,14 @@ export default function HomeScreen() {
             style={styles.quickActionCard}
           >
             <Feather name="clock" size={28} color={Colors.dark.accentYellow} />
-            <ThemedText type="small" style={styles.quickActionLabel}>
+            <ThemedText type="small" style={styles.quickActionLabel} numberOfLines={1}>
               History
             </ThemedText>
           </GlassCard>
           
           <GlassCard onPress={handleRewardsPress} style={styles.quickActionCard}>
             <Feather name="gift" size={28} color={Colors.dark.accentGreen} />
-            <ThemedText type="small" style={styles.quickActionLabel}>
+            <ThemedText type="small" style={styles.quickActionLabel} numberOfLines={1}>
               Rewards
             </ThemedText>
           </GlassCard>
