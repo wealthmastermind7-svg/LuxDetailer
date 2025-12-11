@@ -224,26 +224,87 @@ function setupErrorHandler(app: express.Application) {
 }
 
 (async () => {
-  setupCors(app);
-  setupBodyParsing(app);
-  setupRequestLogging(app);
-  setupStaticFiles(app);
+  try {
+    setupCors(app);
+    setupBodyParsing(app);
+    setupRequestLogging(app);
+    setupStaticFiles(app);
 
-  configureExpoAndLanding(app);
+    configureExpoAndLanding(app);
 
-  const server = await registerRoutes(app);
+    const server = await registerRoutes(app);
 
-  setupErrorHandler(app);
+    setupErrorHandler(app);
 
-  const port = parseInt(process.env.PORT || "5000", 10);
-  server.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`express server serving on port ${port}`);
-    },
-  );
+    // Seed membership plans before starting server
+    await seedMembershipPlans();
+
+    const port = parseInt(process.env.PORT || "5000", 10);
+    server.listen(
+      {
+        port,
+        host: "0.0.0.0",
+        reusePort: true,
+      },
+      () => {
+        log(`express server serving on port ${port}`);
+      },
+    );
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
 })();
+
+async function seedMembershipPlans() {
+  try {
+    const { storage } = await import("./storage");
+    const existingPlans = await storage.getMembershipPlans();
+    
+    if (existingPlans.length === 0) {
+      const membershipPlans = [
+        {
+          name: "Weekly Wash Club",
+          description: "Perfect for those who love a spotless ride. Get a professional exterior wash every week.",
+          frequency: "weekly" as const,
+          pricePerMonth: "149.00",
+          serviceIncluded: "Express Exterior",
+          features: JSON.stringify(["Weekly exterior wash", "Tire dressing included", "Priority scheduling", "10% off add-ons"]),
+          savingsPercent: 60,
+          isPopular: false,
+          isActive: true,
+        },
+        {
+          name: "Fortnightly Fresh",
+          description: "Ideal balance of value and convenience. Bi-weekly washes to keep your car looking great.",
+          frequency: "fortnightly" as const,
+          pricePerMonth: "99.00",
+          serviceIncluded: "Express Exterior",
+          features: JSON.stringify(["Bi-weekly exterior wash", "Tire dressing included", "Flexible scheduling", "5% off add-ons"]),
+          savingsPercent: 45,
+          isPopular: true,
+          isActive: true,
+        },
+        {
+          name: "Monthly Maintain",
+          description: "Essential care for busy lifestyles. Monthly professional wash to maintain your vehicle.",
+          frequency: "monthly" as const,
+          pricePerMonth: "79.00",
+          serviceIncluded: "Gold Wash",
+          features: JSON.stringify(["Monthly Gold Wash", "Interior vacuum included", "Window cleaning", "Membership rewards"]),
+          savingsPercent: 45,
+          isPopular: false,
+          isActive: true,
+        },
+      ];
+
+      for (const plan of membershipPlans) {
+        await storage.createMembershipPlan(plan);
+      }
+      
+      log("Membership plans seeded successfully");
+    }
+  } catch (error) {
+    console.error("Error seeding membership plans:", error);
+  }
+}
