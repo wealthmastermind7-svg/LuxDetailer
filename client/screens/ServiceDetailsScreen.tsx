@@ -1,5 +1,5 @@
-import React from "react";
-import { ScrollView, View, StyleSheet, Pressable } from "react-native";
+import React, { useState, useMemo } from "react";
+import { ScrollView, View, StyleSheet, Pressable, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
@@ -7,57 +7,66 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
-import { Button } from "@/components/Button";
-import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
-import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
+import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { ServicesStackParamList } from "@/navigation/ServicesStackNavigator";
 
-type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
-type RouteType = RouteProp<HomeStackParamList, "ServiceDetails">;
+type NavigationProp = NativeStackNavigationProp<ServicesStackParamList>;
+type RouteType = RouteProp<ServicesStackParamList, "ServiceDetails">;
 
-const SERVICES: Record<string, any> = {
-  "1": {
-    name: "Full Detail",
-    description: "Our signature full detail service includes a complete interior and exterior transformation. We start with a thorough hand wash using premium pH-neutral soap, followed by clay bar treatment to remove contaminants. The exterior receives a hand-applied coat of premium carnauba wax for protection and shine.",
-    icon: "star",
-    price: 299,
-    duration: "4-5 hours",
-    features: ["Premium hand wash", "Clay bar treatment", "Carnauba wax protection", "Interior deep clean", "Dashboard & console polish", "Window cleaning", "Tire dressing", "Air freshener"],
-  },
-  "2": {
-    name: "Ceramic Coating",
-    description: "Professional-grade ceramic coating provides the ultimate protection for your vehicle's paint. Our 9H ceramic coating creates a permanent bond with your paint, offering unmatched durability, hydrophobic properties, and a deep, glossy finish that lasts for years.",
-    icon: "shield",
-    price: 899,
-    duration: "8+ hours",
-    features: ["Multi-stage paint correction", "IPA wipe down", "9H ceramic coating application", "2-year warranty", "Hydrophobic finish", "UV protection", "Chemical resistance", "Easy maintenance"],
-  },
-  "3": {
-    name: "Paint Correction",
-    description: "Restore your paint to showroom condition with our multi-stage paint correction service. We systematically remove swirl marks, light scratches, water spots, and oxidation to reveal a flawless finish.",
-    icon: "zap",
-    price: 449,
-    duration: "6-8 hours",
-    features: ["Paint depth measurement", "Multi-stage compound polish", "Swirl mark removal", "Light scratch elimination", "Water spot removal", "High gloss finish", "Paint sealant protection"],
-  },
-  "4": {
-    name: "Interior Detail",
-    description: "A comprehensive interior cleaning that covers every surface. We steam clean, vacuum, and condition all materials including leather, fabric, plastic, and glass for a fresh, like-new cabin.",
-    icon: "wind",
-    price: 149,
-    duration: "2-3 hours",
-    features: ["Hot water extraction", "Leather cleaning & conditioning", "Carpet shampooing", "Steam sanitization", "Vent cleaning", "Glass cleaning", "Odor elimination"],
-  },
-};
+interface Service {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  price: string;
+  duration: number;
+  imageUrl: string | null;
+  features: string | null;
+  isActive: boolean | null;
+}
 
-const ADD_ONS = [
+interface AddOn {
+  id: string;
+  name: string;
+  price: number;
+}
+
+const ADD_ONS: AddOn[] = [
   { id: "1", name: "Engine Bay Detail", price: 89 },
   { id: "2", name: "Headlight Restoration", price: 79 },
   { id: "3", name: "Wheel Ceramic Coating", price: 149 },
   { id: "4", name: "Leather Protection", price: 99 },
+  { id: "5", name: "Odor Elimination", price: 49 },
+  { id: "6", name: "Pet Hair Removal", price: 59 },
 ];
+
+function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (mins === 0) return `${hours} hour${hours > 1 ? "s" : ""}`;
+  return `${hours}h ${mins}m`;
+}
+
+function parseFeatures(features: string | null): string[] {
+  if (!features) return [];
+  try {
+    return JSON.parse(features);
+  } catch {
+    return [];
+  }
+}
+
+const CATEGORY_ICONS: Record<string, string> = {
+  exterior: "droplet",
+  interior: "wind",
+  premium: "star",
+  protection: "shield",
+};
 
 export default function ServiceDetailsScreen() {
   const insets = useSafeAreaInsets();
@@ -65,13 +74,70 @@ export default function ServiceDetailsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteType>();
   
-  const serviceId = route.params?.serviceId || "1";
-  const service = SERVICES[serviceId] || SERVICES["1"];
+  const serviceId = route.params?.serviceId;
+  const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
+
+  const { data: services = [], isLoading } = useQuery<Service[]>({
+    queryKey: ["/api/services"],
+  });
+
+  const service = useMemo(() => {
+    return services.find(s => s.id === serviceId);
+  }, [services, serviceId]);
+
+  const features = useMemo(() => {
+    return parseFeatures(service?.features || null);
+  }, [service]);
+
+  const basePrice = useMemo(() => {
+    return service ? parseFloat(service.price) : 0;
+  }, [service]);
+
+  const addOnsTotal = useMemo(() => {
+    return selectedAddOns.reduce((total, addOnId) => {
+      const addOn = ADD_ONS.find(a => a.id === addOnId);
+      return total + (addOn?.price || 0);
+    }, 0);
+  }, [selectedAddOns]);
+
+  const totalPrice = basePrice + addOnsTotal;
+
+  const handleAddOnToggle = (addOnId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedAddOns(prev => 
+      prev.includes(addOnId) 
+        ? prev.filter(id => id !== addOnId)
+        : [...prev, addOnId]
+    );
+  };
 
   const handleBookNow = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    navigation.navigate("BookingFlow", { serviceId });
+    navigation.navigate("BookingFlow", {
+      serviceId,
+      addOns: selectedAddOns,
+      totalPrice,
+    });
   };
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={Colors.dark.accent} />
+      </View>
+    );
+  }
+
+  if (!service) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <Feather name="alert-circle" size={48} color={Colors.dark.textSecondary} />
+        <ThemedText type="h3" style={styles.errorText}>Service not found</ThemedText>
+      </View>
+    );
+  }
+
+  const icon = CATEGORY_ICONS[service.category] || "star";
 
   return (
     <View style={styles.container}>
@@ -93,7 +159,7 @@ export default function ServiceDetailsScreen() {
       >
         <View style={styles.heroSection}>
           <View style={styles.iconContainer}>
-            <Feather name={service.icon} size={48} color={Colors.dark.accent} />
+            <Feather name={icon as any} size={48} color={Colors.dark.accent} />
           </View>
           
           <ThemedText type="h1" style={styles.serviceName}>
@@ -104,7 +170,7 @@ export default function ServiceDetailsScreen() {
             <View style={styles.metaItem}>
               <Feather name="clock" size={16} color={Colors.dark.textSecondary} />
               <ThemedText type="small" style={styles.metaText}>
-                {service.duration}
+                {formatDuration(service.duration)}
               </ThemedText>
             </View>
             <View style={styles.metaItem}>
@@ -122,48 +188,62 @@ export default function ServiceDetailsScreen() {
               Starting from
             </ThemedText>
             <ThemedText type="display" style={styles.price}>
-              ${service.price}
+              ${basePrice.toFixed(0)}
             </ThemedText>
           </View>
         </GlassCard>
 
-        <View style={styles.section}>
-          <ThemedText type="h3" style={styles.sectionTitle}>
-            About This Service
-          </ThemedText>
-          <ThemedText type="body" style={styles.description}>
-            {service.description}
-          </ThemedText>
-        </View>
+        {service.description ? (
+          <View style={styles.section}>
+            <ThemedText type="h3" style={styles.sectionTitle}>
+              About This Service
+            </ThemedText>
+            <ThemedText type="body" style={styles.description}>
+              {service.description}
+            </ThemedText>
+          </View>
+        ) : null}
 
-        <View style={styles.section}>
-          <ThemedText type="h3" style={styles.sectionTitle}>
-            What's Included
-          </ThemedText>
-          {service.features.map((feature: string, index: number) => (
-            <View key={index} style={styles.featureItem}>
-              <Feather name="check-circle" size={20} color={Colors.dark.accentGreen} />
-              <ThemedText type="body" style={styles.featureText}>
-                {feature}
-              </ThemedText>
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.section}>
-          <ThemedText type="h3" style={styles.sectionTitle}>
-            Add-Ons
-          </ThemedText>
-          {ADD_ONS.map((addon) => (
-            <GlassCard key={addon.id} style={styles.addonCard}>
-              <View style={styles.addonContent}>
-                <ThemedText type="body">{addon.name}</ThemedText>
-                <ThemedText type="h4" style={styles.addonPrice}>
-                  +${addon.price}
+        {features.length > 0 ? (
+          <View style={styles.section}>
+            <ThemedText type="h3" style={styles.sectionTitle}>
+              What's Included
+            </ThemedText>
+            {features.map((feature: string, index: number) => (
+              <View key={index} style={styles.featureItem}>
+                <View style={styles.checkIcon}>
+                  <Feather name="check" size={16} color={Colors.dark.accentGreen} />
+                </View>
+                <ThemedText type="body" style={styles.featureText}>
+                  {feature}
                 </ThemedText>
               </View>
-            </GlassCard>
-          ))}
+            ))}
+          </View>
+        ) : null}
+
+        <View style={styles.section}>
+          <ThemedText type="h2" style={styles.sectionTitle}>
+            Add-Ons
+          </ThemedText>
+          {ADD_ONS.map((addon) => {
+            const isSelected = selectedAddOns.includes(addon.id);
+            return (
+              <Pressable
+                key={addon.id}
+                onPress={() => handleAddOnToggle(addon.id)}
+                style={[
+                  styles.addonCard,
+                  isSelected && styles.addonCardSelected,
+                ]}
+              >
+                <ThemedText type="body" style={styles.addonName}>{addon.name}</ThemedText>
+                <ThemedText type="body" style={styles.addonPrice}>
+                  +${addon.price}
+                </ThemedText>
+              </Pressable>
+            );
+          })}
         </View>
       </ScrollView>
 
@@ -172,9 +252,21 @@ export default function ServiceDetailsScreen() {
           colors={["transparent", "rgba(0,0,0,0.9)", "#000000"]}
           style={StyleSheet.absoluteFill}
         />
-        <Button onPress={handleBookNow} style={styles.bookButton}>
-          Book Now - ${service.price}
-        </Button>
+        <Pressable 
+          style={styles.bookButton}
+          onPress={handleBookNow}
+        >
+          <LinearGradient
+            colors={[Colors.dark.accent, "#0066CC"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.bookButtonGradient}
+          >
+            <ThemedText type="h3" style={styles.bookButtonText}>
+              Book Now - ${totalPrice.toFixed(0)}
+            </ThemedText>
+          </LinearGradient>
+        </Pressable>
       </View>
     </View>
   );
@@ -184,6 +276,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark.backgroundRoot,
+  },
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    marginTop: Spacing.md,
+    color: Colors.dark.textSecondary,
   },
   scrollView: {
     flex: 1,
@@ -253,19 +353,38 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     paddingVertical: Spacing.sm,
   },
+  checkIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(52, 199, 89, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   featureText: {
     flex: 1,
   },
   addonCard: {
-    marginBottom: Spacing.sm,
-  },
-  addonContent: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    backgroundColor: Colors.dark.backgroundSecondary,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.lg,
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  addonCardSelected: {
+    borderColor: Colors.dark.accent,
+    backgroundColor: "rgba(10, 132, 255, 0.1)",
+  },
+  addonName: {
+    flex: 1,
   },
   addonPrice: {
     color: Colors.dark.accent,
+    fontWeight: "600",
   },
   bottomBar: {
     position: "absolute",
@@ -276,6 +395,16 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.xl,
   },
   bookButton: {
-    ...Shadows.glow,
+    borderRadius: BorderRadius.lg,
+    overflow: "hidden",
+  },
+  bookButtonGradient: {
+    paddingVertical: Spacing.lg,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bookButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
   },
 });
