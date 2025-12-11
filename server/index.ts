@@ -236,7 +236,8 @@ function setupErrorHandler(app: express.Application) {
 
     setupErrorHandler(app);
 
-    // Seed membership plans before starting server
+    // Seed services and membership plans before starting server
+    await seedServices();
     await seedMembershipPlans();
 
     const port = parseInt(process.env.PORT || "5000", 10);
@@ -255,6 +256,116 @@ function setupErrorHandler(app: express.Application) {
     process.exit(1);
   }
 })();
+
+async function seedServices() {
+  try {
+    const { storage } = await import("./storage");
+    const existingServices = await storage.getServices();
+    
+    if (existingServices.length === 0) {
+      const defaultServices = [
+        {
+          name: "Express Exterior",
+          description: "Full exterior wash and dry with tire dressing & rim cleaning",
+          category: "exterior" as const,
+          price: "95.00",
+          duration: 35,
+          features: JSON.stringify(["Full exterior wash and dry", "Tire dressing & rim cleaning", "Exterior window cleaning", "Glossy exterior finish"]),
+          isActive: true,
+        },
+        {
+          name: "Gold Wash",
+          description: "Full exterior hand wash with thorough interior vacuum and cleaning",
+          category: "exterior" as const,
+          price: "145.00",
+          duration: 62,
+          features: JSON.stringify(["Full exterior hand wash", "Tire dressing & rim cleaning", "Exterior window cleaning", "Interior & trunk vacuum", "Interior wipe down", "Door jambs", "Window cleaning inside", "Glossy exterior finish"]),
+          isActive: true,
+        },
+        {
+          name: "Platinum Wash",
+          description: "Complete hand wash with wax, leather conditioning, and light stain removal",
+          category: "exterior" as const,
+          price: "225.00",
+          duration: 105,
+          features: JSON.stringify(["Full exterior hand wash", "Tire dressing & rim cleaning", "Exterior window cleaning", "Interior & trunk vacuum", "Interior wipe down", "Door jambs", "Window cleaning inside", "Complete wax", "Leather cleaning & conditioning", "Light stain removal"]),
+          isActive: true,
+        },
+        {
+          name: "Scratch Removal",
+          description: "Professional scratch assessment and removal with machine polish and buffing",
+          category: "exterior" as const,
+          price: "260.00",
+          duration: 80,
+          features: JSON.stringify(["Scratch assessment", "Surface cleaning and prep", "Compound", "Machine polish", "Final buffing for smoothness", "Clear coat repair", "Touch up paint/blending"]),
+          isActive: true,
+        },
+        {
+          name: "Interior Detail",
+          description: "Thorough vacuum, steam clean, and conditioning of entire interior",
+          category: "interior" as const,
+          price: "350.00",
+          duration: 90,
+          features: JSON.stringify(["Thorough vacuum including trunk", "Standard pet hair removal", "Thorough interior wipe down", "Shampoo carpets & floor mats", "Interior steam clean at 212F", "Leather cleaning & conditioning"]),
+          isActive: true,
+        },
+        {
+          name: "Deluxe Detail",
+          description: "Full exterior and interior detail with clay bar, wax, and plastic dressing",
+          category: "premium" as const,
+          price: "415.00",
+          duration: 165,
+          features: JSON.stringify(["Full exterior hand wash", "Tire dressing & rim cleaning", "Exterior window cleaning", "Interior & trunk vacuum", "Interior wipe down", "Door jambs", "Window cleaning inside", "Complete wax", "Leather cleaning & conditioning", "Clay bar paint treatment", "Outside plastic dressing", "Mats & carpets shampooed"]),
+          isActive: true,
+        },
+        {
+          name: "Signature Detail",
+          description: "Ultimate detail with multi-stage buffing, sealant wax, and single-stage paint buffing",
+          category: "premium" as const,
+          price: "625.00",
+          duration: 220,
+          features: JSON.stringify(["Full exterior hand wash", "Tire dressing & rim cleaning", "Exterior window cleaning", "Interior & trunk vacuum", "Interior wipe down", "Door jambs", "Window cleaning inside", "Leather cleaning & conditioning", "Clay bar paint treatment", "Water spot removal", "Outside plastic dressing", "Mats & carpets shampooed", "Plastic dressing inside", "Single-stage paint buffing", "Sealant wax", "Shampoo seats"]),
+          isActive: true,
+        },
+        {
+          name: "Diamond Ceramic",
+          description: "Glass-like ceramic coating with 1-3 years protection and 9h hardness",
+          category: "protection" as const,
+          price: "1045.00",
+          duration: 330,
+          features: JSON.stringify(["Super gloss", "Super hydrophobic", "Free inside and out wash", "Single-stage buffing", "1-3 layers of glass-like coating", "Above 9h hardness protection", "Chemical-resistant protection", "1-3 years of protection", "Clay bar paint treatment", "Standard inside and out wash"]),
+          isActive: true,
+        },
+        {
+          name: "Titanium Gloss",
+          description: "Premium ceramic with multi-stage buffing, showroom finish, and 1-3 year protection",
+          category: "protection" as const,
+          price: "1680.00",
+          duration: 220,
+          features: JSON.stringify(["Assessment of vehicle and paint evaluation", "Standard inside and out wash including trunk", "Wash and decontamination with clay bar and iron removal", "Clay bar paint treatment", "Heavy compounding", "Multi-stage buffing for smoothness", "Showroom finish", "Super hydrophobic", "1-3 layers of glass-like coating", "Above 9h hardness protection", "1-3 years of protection", "Super gloss", "Chemical-resistant protection"]),
+          isActive: true,
+        },
+        {
+          name: "Window Tinting",
+          description: "Professional window tinting with UV and thermal protection",
+          category: "protection" as const,
+          price: "1045.00",
+          duration: 220,
+          features: JSON.stringify(["UVA and UVB ray shielding", "Temperature reduction and glare elimination", "Improved protection from theft", "Adds appeal and aesthetics", "Safer driving with less glare"]),
+          isActive: true,
+        },
+      ];
+
+      for (const service of defaultServices) {
+        await storage.createService(service);
+      }
+      
+      log("Services seeded successfully");
+    }
+  } catch (error) {
+    console.error("Error seeding services:", error);
+  }
+}
 
 async function seedMembershipPlans() {
   try {

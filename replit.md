@@ -210,10 +210,11 @@ See `design_guidelines.md` for comprehensive design specifications including:
 ## Recent Changes
 
 ### December 11, 2025
-- **Fixed**: Automatic seeding of membership plans on server startup
-  - Plans now populate before server starts listening
-  - Ensures API returns membership data immediately
-  - Three plans: Weekly Wash Club, Fortnightly Fresh, Monthly Maintain
+- **Fixed**: Automatic seeding of services and membership plans on server startup
+  - Services and plans now populate before server starts listening
+  - Ensures API returns full catalog data immediately on deployment
+  - 10 services: Express Exterior, Gold Wash, Platinum Wash, Scratch Removal, Interior Detail, Deluxe Detail, Signature Detail, Diamond Ceramic, Titanium Gloss, Window Tinting
+  - Three membership plans: Weekly Wash Club, Fortnightly Fresh, Monthly Maintain
 - **Complete**: Membership system integration
   - Added MembershipsScreen to HomeStackNavigator
   - Integrated "Memberships" quick action on Home screen
