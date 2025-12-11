@@ -230,7 +230,7 @@ export default function BookingFlowScreen() {
       case "Service": return !!selectedService;
       case "Date": return !!selectedDate;
       case "Time": return !!selectedTime;
-      case "Location": return !!selectedLocationType;
+      case "Location": return !!selectedLocationType && location.trim().length > 0;
       case "Confirm": return true;
       default: return false;
     }
@@ -575,7 +575,13 @@ export default function BookingFlowScreen() {
       </View>
 
       <FloatingMascot 
-        message={STEPS[currentStep] === "Location" ? "Enter your work address to complete your booking" : undefined}
+        message={
+          STEPS[currentStep] === "Location" 
+            ? location.trim().length === 0 
+              ? "Enter your address to activate the Continue button"
+              : "Address confirmed! Ready to move forward"
+            : undefined
+        }
         bottomOffset={140}
       />
 
