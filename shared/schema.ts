@@ -76,6 +76,34 @@ export const bookings = pgTable("bookings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const membershipPlans = pgTable("membership_plans", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  frequency: text("frequency").notNull(),
+  pricePerMonth: decimal("price_per_month", { precision: 10, scale: 2 }).notNull(),
+  serviceIncluded: text("service_included").notNull(),
+  features: text("features"),
+  savingsPercent: integer("savings_percent"),
+  isPopular: boolean("is_popular").default(false),
+  isActive: boolean("is_active").default(true),
+});
+
+export const userMemberships = pgTable("user_memberships", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  planId: varchar("plan_id").references(() => membershipPlans.id).notNull(),
+  status: text("status").notNull().default("active"),
+  startDate: timestamp("start_date").defaultNow(),
+  nextWashDate: timestamp("next_wash_date"),
+  washesRemaining: integer("washes_remaining").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -115,5 +143,20 @@ export const insertSessionSchema = createInsertSchema(sessions).omit({
   createdAt: true,
 });
 
+export const insertMembershipPlanSchema = createInsertSchema(membershipPlans).omit({
+  id: true,
+});
+
+export const insertUserMembershipSchema = createInsertSchema(userMemberships).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertSession = z.infer<typeof insertSessionSchema>;
 export type Session = typeof sessions.$inferSelect;
+
+export type InsertMembershipPlan = z.infer<typeof insertMembershipPlanSchema>;
+export type MembershipPlan = typeof membershipPlans.$inferSelect;
+
+export type InsertUserMembership = z.infer<typeof insertUserMembershipSchema>;
+export type UserMembership = typeof userMemberships.$inferSelect;

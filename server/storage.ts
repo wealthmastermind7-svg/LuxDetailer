@@ -5,6 +5,8 @@ import {
   vehicles,
   services,
   bookings,
+  membershipPlans,
+  userMemberships,
   type User,
   type InsertUser,
   type Vehicle,
@@ -13,6 +15,10 @@ import {
   type InsertService,
   type Booking,
   type InsertBooking,
+  type MembershipPlan,
+  type InsertMembershipPlan,
+  type UserMembership,
+  type InsertUserMembership,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -36,6 +42,15 @@ export interface IStorage {
   createBooking(booking: InsertBooking): Promise<Booking>;
   updateBooking(id: string, booking: Partial<InsertBooking>): Promise<Booking | undefined>;
   cancelBooking(id: string): Promise<boolean>;
+
+  getMembershipPlans(): Promise<MembershipPlan[]>;
+  getMembershipPlan(id: string): Promise<MembershipPlan | undefined>;
+  createMembershipPlan(plan: InsertMembershipPlan): Promise<MembershipPlan>;
+
+  getUserMembership(userId: string): Promise<UserMembership | undefined>;
+  createUserMembership(membership: InsertUserMembership): Promise<UserMembership>;
+  updateUserMembership(id: string, updates: Partial<InsertUserMembership>): Promise<UserMembership | undefined>;
+  cancelUserMembership(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -126,6 +141,41 @@ export class DatabaseStorage implements IStorage {
 
   async cancelBooking(id: string): Promise<boolean> {
     await db.update(bookings).set({ status: "cancelled", updatedAt: new Date() }).where(eq(bookings.id, id));
+    return true;
+  }
+
+  async getMembershipPlans(): Promise<MembershipPlan[]> {
+    return db.select().from(membershipPlans).where(eq(membershipPlans.isActive, true));
+  }
+
+  async getMembershipPlan(id: string): Promise<MembershipPlan | undefined> {
+    const [plan] = await db.select().from(membershipPlans).where(eq(membershipPlans.id, id));
+    return plan;
+  }
+
+  async createMembershipPlan(plan: InsertMembershipPlan): Promise<MembershipPlan> {
+    const [newPlan] = await db.insert(membershipPlans).values(plan).returning();
+    return newPlan;
+  }
+
+  async getUserMembership(userId: string): Promise<UserMembership | undefined> {
+    const [membership] = await db.select().from(userMemberships)
+      .where(eq(userMemberships.userId, userId));
+    return membership;
+  }
+
+  async createUserMembership(membership: InsertUserMembership): Promise<UserMembership> {
+    const [newMembership] = await db.insert(userMemberships).values(membership).returning();
+    return newMembership;
+  }
+
+  async updateUserMembership(id: string, updates: Partial<InsertUserMembership>): Promise<UserMembership | undefined> {
+    const [membership] = await db.update(userMemberships).set(updates).where(eq(userMemberships.id, id)).returning();
+    return membership;
+  }
+
+  async cancelUserMembership(id: string): Promise<boolean> {
+    await db.update(userMemberships).set({ status: "cancelled" }).where(eq(userMemberships.id, id));
     return true;
   }
 }

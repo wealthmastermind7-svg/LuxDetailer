@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "node:http";
 import { storage } from "./storage";
-import { insertBookingSchema, insertVehicleSchema, insertServiceSchema, insertUserSchema } from "@shared/schema";
+import { insertBookingSchema, insertVehicleSchema, insertServiceSchema, insertUserSchema, insertUserMembershipSchema } from "@shared/schema";
 import { authMiddleware, requireAuth, requireAdmin, rateLimiter, hashPassword, verifyPassword, createSession, deleteSession } from "./auth";
 import { z } from "zod";
 
@@ -309,6 +309,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =====================
+  // MEMBERSHIPS (Public read, Authenticated subscribe)
+  // =====================
+
+  app.get("/api/memberships/plans", async (req, res) => {
+    try {
+      const plans = await storage.getMembershipPlans();
+      res.json(plans);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch membership plans" });
+    }
+  });
+
+  app.get("/api/memberships/plans/:id", async (req, res) => {
+    try {
+      const plan = await storage.getMembershipPlan(req.params.id);
+      if (!plan) {
+        return res.status(404).json({ error: "Plan not found" });
+      }
+      res.json(plan);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch membership plan" });
+    }
+  });
+
+  app.get("/api/memberships/my", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const membership = await storage.getUserMembership(req.user!.id);
+      res.json(membership || null);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch membership" });
+    }
+  });
+
+  app.post("/api/memberships/subscribe", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { planId } = req.body;
+      if (!planId) {
+        return res.status(400).json({ error: "Plan ID is required" });
+      }
+
+      const plan = await storage.getMembershipPlan(planId);
+      if (!plan) {
+        return res.status(404).json({ error: "Plan not found" });
+      }
+
+      const existingMembership = await storage.getUserMembership(req.user!.id);
+      if (existingMembership && existingMembership.status === "active") {
+        return res.status(409).json({ error: "You already have an active membership" });
+      }
+
+      const nextWashDate = new Date();
+      nextWashDate.setDate(nextWashDate.getDate() + 1);
+
+      const washesPerMonth = plan.frequency === "weekly" ? 4 : plan.frequency === "fortnightly" ? 2 : 1;
+
+      const membership = await storage.createUserMembership({
+        userId: req.user!.id,
+        planId,
+        status: "active",
+        nextWashDate,
+        washesRemaining: washesPerMonth,
+      });
+
+      res.status(201).json(membership);
+    } catch (error) {
+      console.error("Subscription error:", error);
+      res.status(500).json({ error: "Failed to subscribe" });
+    }
+  });
+
+  app.post("/api/memberships/cancel", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const membership = await storage.getUserMembership(req.user!.id);
+      if (!membership) {
+        return res.status(404).json({ error: "No active membership found" });
+      }
+
+      await storage.cancelUserMembership(membership.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to cancel membership" });
+    }
+  });
+
+  // =====================
   // ADMIN ONLY ENDPOINTS
   // =====================
   
@@ -414,6 +499,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: "Services seeded successfully" });
     } catch (error) {
       res.status(500).json({ error: "Failed to seed services" });
+    }
+  });
+
+  app.post("/api/admin/seed-memberships", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const membershipPlans = [
+        {
+          name: "Weekly Wash Club",
+          description: "Perfect for those who love a spotless ride. Get a professional exterior wash every week.",
+          frequency: "weekly",
+          pricePerMonth: "149.00",
+          serviceIncluded: "Express Exterior",
+          features: JSON.stringify(["Weekly exterior wash", "Tire dressing included", "Priority scheduling", "10% off add-ons"]),
+          savingsPercent: 60,
+          isPopular: false,
+          isActive: true,
+        },
+        {
+          name: "Fortnightly Fresh",
+          description: "Ideal balance of value and convenience. Bi-weekly washes to keep your car looking great.",
+          frequency: "fortnightly",
+          pricePerMonth: "99.00",
+          serviceIncluded: "Express Exterior",
+          features: JSON.stringify(["Bi-weekly exterior wash", "Tire dressing included", "Flexible scheduling", "5% off add-ons"]),
+          savingsPercent: 45,
+          isPopular: true,
+          isActive: true,
+        },
+        {
+          name: "Monthly Maintain",
+          description: "Essential care for busy lifestyles. Monthly professional wash to maintain your vehicle.",
+          frequency: "monthly",
+          pricePerMonth: "79.00",
+          serviceIncluded: "Gold Wash",
+          features: JSON.stringify(["Monthly Gold Wash", "Interior vacuum included", "Window cleaning", "Membership rewards"]),
+          savingsPercent: 45,
+          isPopular: false,
+          isActive: true,
+        },
+      ];
+
+      for (const plan of membershipPlans) {
+        await storage.createMembershipPlan(plan);
+      }
+
+      res.json({ success: true, message: "Membership plans seeded successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to seed membership plans" });
     }
   });
 
