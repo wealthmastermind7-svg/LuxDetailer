@@ -420,8 +420,8 @@ const styles = StyleSheet.create({
   },
   statValue: {
     color: Colors.dark.accent,
-    marginBottom: Spacing.sm,
-    fontSize: 32,
+    marginBottom: Spacing.xs,
+    fontSize: 24,
     fontWeight: "700",
   },
   statLabel: {
