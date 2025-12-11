@@ -26,9 +26,9 @@ const SERVICES = [
   { id: "5", name: "Interior Detail", icon: "home", price: 350, duration: "80-100m" },
   { id: "6", name: "Deluxe Detail", icon: "star", price: 415, duration: "150-180m" },
   { id: "7", name: "Signature Detail", icon: "heart", price: 625, duration: "200-240m" },
-  { id: "8", name: "Diamond Ceramic", icon: "gem", price: 1045, duration: "300-360m" },
-  { id: "9", name: "Window Tinting", icon: "square", price: 1045, duration: "200-240m" },
-  { id: "10", name: "Titanium Gloss", icon: "sparkles", price: 1680, duration: "200-240m" },
+  { id: "8", name: "Diamond Ceramic", icon: "award", price: 1045, duration: "300-360m" },
+  { id: "9", name: "Window Tinting", icon: "grid", price: 1045, duration: "200-240m" },
+  { id: "10", name: "Titanium Gloss", icon: "sun", price: 1680, duration: "200-240m" },
 ].sort((a, b) => a.price - b.price);
 
 const PROMOTIONS = [

@@ -1,10 +1,109 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "node:http";
 import { storage } from "./storage";
-import { insertBookingSchema, insertVehicleSchema, insertServiceSchema } from "@shared/schema";
+import { insertBookingSchema, insertVehicleSchema, insertServiceSchema, insertUserSchema } from "@shared/schema";
+import { authMiddleware, requireAuth, requireAdmin, rateLimiter, hashPassword, verifyPassword, createSession, deleteSession } from "./auth";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  username: z.string().min(3),
+  password: z.string().min(6),
+});
+
+const registerSchema = z.object({
+  username: z.string().min(3),
+  password: z.string().min(6),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Services endpoints
+  app.use(rateLimiter);
+  app.use(authMiddleware());
+
+  // =====================
+  // AUTH ENDPOINTS (Public)
+  // =====================
+  
+  app.post("/api/auth/register", async (req: Request, res: Response) => {
+    try {
+      const parsed = registerSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid registration data", details: parsed.error.errors });
+      }
+
+      const existing = await storage.getUserByUsername(parsed.data.username);
+      if (existing) {
+        return res.status(409).json({ error: "Username already exists" });
+      }
+
+      const hashedPassword = hashPassword(parsed.data.password);
+      const user = await storage.createUser({
+        username: parsed.data.username,
+        password: hashedPassword,
+        email: parsed.data.email,
+        phone: parsed.data.phone,
+      });
+
+      const token = await createSession(user.id);
+
+      res.status(201).json({
+        user: { id: user.id, username: user.username, email: user.email, role: user.role },
+        token,
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ error: "Failed to register" });
+    }
+  });
+
+  app.post("/api/auth/login", async (req: Request, res: Response) => {
+    try {
+      const parsed = loginSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid login data" });
+      }
+
+      const user = await storage.getUserByUsername(parsed.data.username);
+      if (!user) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      if (!verifyPassword(parsed.data.password, user.password)) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      const token = await createSession(user.id);
+
+      res.json({
+        user: { id: user.id, username: user.username, email: user.email, role: user.role },
+        token,
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ error: "Failed to login" });
+    }
+  });
+
+  app.post("/api/auth/logout", requireAuth, async (req: Request, res: Response) => {
+    try {
+      if (req.sessionToken) {
+        await deleteSession(req.sessionToken);
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to logout" });
+    }
+  });
+
+  app.get("/api/auth/me", requireAuth, async (req: Request, res: Response) => {
+    res.json({ user: req.user });
+  });
+
+  // =====================
+  // SERVICES (Public read, Admin write)
+  // =====================
+  
   app.get("/api/services", async (req, res) => {
     try {
       const services = await storage.getServices();
@@ -35,7 +134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/services", async (req, res) => {
+  app.post("/api/services", requireAuth, requireAdmin, async (req, res) => {
     try {
       const parsed = insertServiceSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -48,25 +147,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Vehicles endpoints
-  app.get("/api/vehicles", async (req, res) => {
+  // =====================
+  // VEHICLES (Authenticated, owner only)
+  // =====================
+  
+  app.get("/api/vehicles", requireAuth, async (req: Request, res: Response) => {
     try {
-      const userId = req.query.userId as string;
-      if (!userId) {
-        return res.status(400).json({ error: "userId is required" });
-      }
-      const vehicles = await storage.getVehicles(userId);
+      const vehicles = await storage.getVehicles(req.user!.id);
       res.json(vehicles);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch vehicles" });
     }
   });
 
-  app.get("/api/vehicles/:id", async (req, res) => {
+  app.get("/api/vehicles/:id", requireAuth, async (req: Request, res: Response) => {
     try {
       const vehicle = await storage.getVehicle(req.params.id);
       if (!vehicle) {
         return res.status(404).json({ error: "Vehicle not found" });
+      }
+      if (vehicle.userId !== req.user!.id && req.user!.role !== "admin") {
+        return res.status(403).json({ error: "Access denied" });
       }
       res.json(vehicle);
     } catch (error) {
@@ -74,9 +175,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/vehicles", async (req, res) => {
+  app.post("/api/vehicles", requireAuth, async (req: Request, res: Response) => {
     try {
-      const parsed = insertVehicleSchema.safeParse(req.body);
+      const parsed = insertVehicleSchema.safeParse({
+        ...req.body,
+        userId: req.user!.id,
+      });
       if (!parsed.success) {
         return res.status(400).json({ error: "Invalid vehicle data", details: parsed.error });
       }
@@ -87,20 +191,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/vehicles/:id", async (req, res) => {
+  app.patch("/api/vehicles/:id", requireAuth, async (req: Request, res: Response) => {
     try {
-      const vehicle = await storage.updateVehicle(req.params.id, req.body);
-      if (!vehicle) {
+      const existingVehicle = await storage.getVehicle(req.params.id);
+      if (!existingVehicle) {
         return res.status(404).json({ error: "Vehicle not found" });
       }
+      if (existingVehicle.userId !== req.user!.id && req.user!.role !== "admin") {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      const vehicle = await storage.updateVehicle(req.params.id, req.body);
       res.json(vehicle);
     } catch (error) {
       res.status(500).json({ error: "Failed to update vehicle" });
     }
   });
 
-  app.delete("/api/vehicles/:id", async (req, res) => {
+  app.delete("/api/vehicles/:id", requireAuth, async (req: Request, res: Response) => {
     try {
+      const existingVehicle = await storage.getVehicle(req.params.id);
+      if (!existingVehicle) {
+        return res.status(404).json({ error: "Vehicle not found" });
+      }
+      if (existingVehicle.userId !== req.user!.id && req.user!.role !== "admin") {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
       await storage.deleteVehicle(req.params.id);
       res.status(204).send();
     } catch (error) {
@@ -108,22 +225,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Bookings endpoints
-  app.get("/api/bookings", async (req, res) => {
+  // =====================
+  // BOOKINGS (Authenticated, owner only)
+  // =====================
+  
+  app.get("/api/bookings", requireAuth, async (req: Request, res: Response) => {
     try {
-      const userId = req.query.userId as string | undefined;
-      const bookings = await storage.getBookings(userId);
+      if (req.user!.role === "admin") {
+        const bookings = await storage.getBookings();
+        return res.json(bookings);
+      }
+      const bookings = await storage.getBookings(req.user!.id);
       res.json(bookings);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch bookings" });
     }
   });
 
-  app.get("/api/bookings/:id", async (req, res) => {
+  app.get("/api/bookings/:id", requireAuth, async (req: Request, res: Response) => {
     try {
       const booking = await storage.getBooking(req.params.id);
       if (!booking) {
         return res.status(404).json({ error: "Booking not found" });
+      }
+      if (booking.userId !== req.user!.id && req.user!.role !== "admin") {
+        return res.status(403).json({ error: "Access denied" });
       }
       res.json(booking);
     } catch (error) {
@@ -131,9 +257,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/bookings", async (req, res) => {
+  app.post("/api/bookings", requireAuth, async (req: Request, res: Response) => {
     try {
-      const parsed = insertBookingSchema.safeParse(req.body);
+      const parsed = insertBookingSchema.safeParse({
+        ...req.body,
+        userId: req.user!.id,
+      });
       if (!parsed.success) {
         return res.status(400).json({ error: "Invalid booking data", details: parsed.error });
       }
@@ -144,20 +273,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/bookings/:id", async (req, res) => {
+  app.patch("/api/bookings/:id", requireAuth, async (req: Request, res: Response) => {
     try {
-      const booking = await storage.updateBooking(req.params.id, req.body);
-      if (!booking) {
+      const existingBooking = await storage.getBooking(req.params.id);
+      if (!existingBooking) {
         return res.status(404).json({ error: "Booking not found" });
       }
+      if (existingBooking.userId !== req.user!.id && req.user!.role !== "admin") {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      const booking = await storage.updateBooking(req.params.id, req.body);
       res.json(booking);
     } catch (error) {
       res.status(500).json({ error: "Failed to update booking" });
     }
   });
 
-  app.post("/api/bookings/:id/cancel", async (req, res) => {
+  app.post("/api/bookings/:id/cancel", requireAuth, async (req: Request, res: Response) => {
     try {
+      const existingBooking = await storage.getBooking(req.params.id);
+      if (!existingBooking) {
+        return res.status(404).json({ error: "Booking not found" });
+      }
+      if (existingBooking.userId !== req.user!.id && req.user!.role !== "admin") {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
       await storage.cancelBooking(req.params.id);
       res.json({ success: true });
     } catch (error) {
@@ -165,8 +307,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Seed services endpoint (for initial data setup)
-  app.post("/api/seed-services", async (req, res) => {
+  // =====================
+  // ADMIN ONLY ENDPOINTS
+  // =====================
+  
+  app.post("/api/admin/seed-services", requireAuth, requireAdmin, async (req, res) => {
     try {
       const defaultServices = [
         {
@@ -211,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           category: "interior",
           price: "350.00",
           duration: 90,
-          features: JSON.stringify(["Thorough vacuum including trunk", "Standard pet hair removal", "Thorough interior wipe down", "Shampoo carpets & floor mats", "Interior steam clean at 212°F", "Leather cleaning & conditioning"]),
+          features: JSON.stringify(["Thorough vacuum including trunk", "Standard pet hair removal", "Thorough interior wipe down", "Shampoo carpets & floor mats", "Interior steam clean at 212F", "Leather cleaning & conditioning"]),
           isActive: true,
         },
         {
@@ -247,7 +392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           category: "protection",
           price: "1680.00",
           duration: 220,
-          features: JSON.stringify(["Assessment of vehicle and paint evaluation", "Standard inside and out wash including trunk", "Wash & decontamination with clay bar and iron removal", "Clay bar paint treatment", "Heavy compounding", "Multi-stage buffing for smoothness", "Showroom finish", "Super hydrophobic", "1-3 layers of glass-like coating", "Above 9h hardness protection", "1-3 years of protection", "Super gloss", "Chemical-resistant protection"]),
+          features: JSON.stringify(["Assessment of vehicle and paint evaluation", "Standard inside and out wash including trunk", "Wash and decontamination with clay bar and iron removal", "Clay bar paint treatment", "Heavy compounding", "Multi-stage buffing for smoothness", "Showroom finish", "Super hydrophobic", "1-3 layers of glass-like coating", "Above 9h hardness protection", "1-3 years of protection", "Super gloss", "Chemical-resistant protection"]),
           isActive: true,
         },
         {
