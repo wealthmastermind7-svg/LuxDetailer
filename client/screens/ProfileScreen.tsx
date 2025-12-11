@@ -421,14 +421,14 @@ const styles = StyleSheet.create({
   statValue: {
     color: Colors.dark.accent,
     marginBottom: Spacing.xs,
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "700",
   },
   statLabel: {
     opacity: 0.6,
     textAlign: "center",
-    fontSize: 11,
-    lineHeight: 14,
+    fontSize: 12,
+    lineHeight: 15,
     width: "100%",
   },
   menuSection: {
