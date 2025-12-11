@@ -6,6 +6,7 @@ import BookingFlowScreen from "@/screens/BookingFlowScreen";
 import MyVehicleScreen from "@/screens/MyVehicleScreen";
 import ServicesScreen from "@/screens/ServicesScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
+import MembershipsScreen from "@/screens/MembershipsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { Colors } from "@/constants/theme";
 
@@ -16,6 +17,7 @@ export type HomeStackParamList = {
   MyVehicle: undefined;
   Services: undefined;
   Settings: undefined;
+  Memberships: undefined;
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -62,6 +64,11 @@ export default function HomeStackNavigator() {
         name="Settings"
         component={SettingsScreen}
         options={{ headerTitle: "Settings" }}
+      />
+      <Stack.Screen
+        name="Memberships"
+        component={MembershipsScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

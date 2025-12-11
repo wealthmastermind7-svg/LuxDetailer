@@ -74,7 +74,7 @@ export default function HomeScreen() {
 
   const handleRewardsPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setMascotMessage("Rewards program coming soon!");
+    navigation.navigate("Memberships");
   };
 
   return (
@@ -147,9 +147,9 @@ export default function HomeScreen() {
           </GlassCard>
           
           <GlassCard onPress={handleRewardsPress} style={styles.quickActionCard}>
-            <Feather name="gift" size={28} color={Colors.dark.accentGreen} />
+            <Feather name="award" size={28} color={Colors.dark.accentGreen} />
             <ThemedText type="small" style={styles.quickActionLabel} numberOfLines={1}>
-              Rewards
+              Membership
             </ThemedText>
           </GlassCard>
         </View>
