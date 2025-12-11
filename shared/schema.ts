@@ -3,6 +3,11 @@ import { pgTable, text, varchar, integer, timestamp, decimal, boolean } from "dr
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const userRoles = {
+  USER: "user",
+  ADMIN: "admin",
+} as const;
+
 export const users = pgTable("users", {
   id: varchar("id")
     .primaryKey()
@@ -11,6 +16,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email"),
   phone: text("phone"),
+  role: text("role").notNull().default("user"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -40,6 +46,16 @@ export const services = pgTable("services", {
   imageUrl: text("image_url"),
   features: text("features"),
   isActive: boolean("is_active").default(true),
+});
+
+export const sessions = pgTable("sessions", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  token: varchar("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const bookings = pgTable("bookings", {
@@ -93,3 +109,11 @@ export type Service = typeof services.$inferSelect;
 
 export type InsertBooking = z.infer<typeof insertBookingSchema>;
 export type Booking = typeof bookings.$inferSelect;
+
+export const insertSessionSchema = createInsertSchema(sessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSession = z.infer<typeof insertSessionSchema>;
+export type Session = typeof sessions.$inferSelect;
