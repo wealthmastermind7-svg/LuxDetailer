@@ -1,7 +1,6 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
 import { Platform, StyleSheet, View, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import HomeStackNavigator from "@/navigation/HomeStackNavigator";
@@ -10,6 +9,7 @@ import BookingsStackNavigator from "@/navigation/BookingsStackNavigator";
 import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
 import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import * as Haptics from "expo-haptics";
+import { GlassmorphicTabBar } from "@/components/GlassmorphicTabBar";
 
 export type MainTabParamList = {
   HomeTab: undefined;
@@ -34,31 +34,9 @@ export default function MainTabNavigator() {
       screenOptions={{
         tabBarActiveTintColor: Colors.dark.accent,
         tabBarInactiveTintColor: Colors.dark.tabIconDefault,
-        tabBarStyle: {
-          position: "absolute",
-          backgroundColor: Platform.select({
-            ios: "transparent",
-            android: Colors.dark.backgroundRoot,
-          }),
-          borderTopWidth: 0,
-          elevation: 0,
-          height: 80 + insets.bottom,
-          paddingBottom: insets.bottom,
-        },
-        tabBarBackground: () =>
-          Platform.OS === "ios" ? (
-            <BlurView
-              intensity={80}
-              tint="dark"
-              style={StyleSheet.absoluteFill}
-            />
-          ) : null,
         headerShown: false,
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "500",
-        },
       }}
+      tabBar={(props) => <GlassmorphicTabBar {...props} />}
     >
       <Tab.Screen
         name="HomeTab"
