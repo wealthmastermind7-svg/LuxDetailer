@@ -230,7 +230,7 @@ export default function BookingFlowScreen() {
       case "Service": return !!selectedService;
       case "Date": return !!selectedDate;
       case "Time": return !!selectedTime;
-      case "Location": return !!selectedLocationType && location.trim().length > 0;
+      case "Location": return location.trim().length > 0;
       case "Confirm": return true;
       default: return false;
     }
@@ -377,66 +377,38 @@ export default function BookingFlowScreen() {
         return (
           <View style={styles.stepContent}>
             <ThemedText type="h2" style={styles.stepTitle}>
-              Service Location
+              Where Are We Coming?
             </ThemedText>
             <ThemedText type="body" style={styles.stepSubtitle}>
-              Where should we detail your vehicle?
+              Enter your service address
             </ThemedText>
-            <View style={styles.locationGrid}>
-              {LOCATION_PRESETS.map((preset) => (
-                <Pressable
-                  key={preset.id}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setSelectedLocationType(preset.id);
-                  }}
-                  style={({ pressed }) => [
-                    styles.locationCard,
-                    selectedLocationType === preset.id && styles.locationCardSelected,
-                    pressed && styles.locationCardPressed,
-                  ]}
-                >
-                  <Feather
-                    name={preset.icon}
-                    size={28}
-                    color={selectedLocationType === preset.id ? Colors.dark.accent : Colors.dark.text}
-                  />
-                  <ThemedText
-                    type="body"
-                    style={[
-                      styles.locationLabel,
-                      selectedLocationType === preset.id && styles.locationLabelSelected,
-                    ]}
-                  >
-                    {preset.label}
-                  </ThemedText>
-                </Pressable>
-              ))}
-            </View>
-            {selectedLocationType ? (
-              <GlassCard style={styles.inputCard}>
-                <ThemedText type="small" style={styles.inputLabel}>
-                  {LOCATION_PRESETS.find(p => p.id === selectedLocationType)?.hint || "Address"}
-                </ThemedText>
-                <TextInput
-                  style={styles.textInput}
-                  value={location}
-                  onChangeText={setLocation}
-                  placeholder="123 Main St, City, State"
-                  placeholderTextColor={Colors.dark.textSecondary}
-                />
-              </GlassCard>
-            ) : null}
+            
+            <GlassCard style={[styles.inputCard, styles.largeAddressCard]}>
+              <ThemedText type="small" style={styles.inputLabel}>
+                Service Address
+              </ThemedText>
+              <TextInput
+                style={[styles.textInput, styles.largeAddressInput]}
+                value={location}
+                onChangeText={setLocation}
+                placeholder="123 Main St, City, State"
+                placeholderTextColor={Colors.dark.textSecondary}
+                autoCapitalize="words"
+                autoCorrect={false}
+              />
+            </GlassCard>
+
             <GlassCard style={styles.inputCard}>
               <ThemedText type="small" style={styles.inputLabel}>
-                Notes (Optional)
+                Special Instructions (Optional)
               </ThemedText>
               <TextInput
                 style={styles.textInput}
                 value={notes}
                 onChangeText={setNotes}
-                placeholder="Gate code, parking spot, etc."
+                placeholder="Gate code, parking spot, access info..."
                 placeholderTextColor={Colors.dark.textSecondary}
+                autoCapitalize="sentences"
               />
             </GlassCard>
           </View>
@@ -575,13 +547,7 @@ export default function BookingFlowScreen() {
       </View>
 
       <FloatingMascot 
-        message={
-          STEPS[currentStep] === "Location" 
-            ? location.trim().length === 0 
-              ? "Enter your address to activate the Continue button"
-              : "Address confirmed! Ready to move forward"
-            : undefined
-        }
+        message={undefined}
         bottomOffset={140}
       />
 
@@ -816,6 +782,13 @@ const styles = StyleSheet.create({
     fontSize: 17,
     minHeight: 60,
     textAlignVertical: "top",
+  },
+  largeAddressCard: {
+    marginBottom: Spacing.lg,
+  },
+  largeAddressInput: {
+    minHeight: 80,
+    fontSize: 18,
   },
   summaryCard: {
     marginBottom: Spacing.md,
