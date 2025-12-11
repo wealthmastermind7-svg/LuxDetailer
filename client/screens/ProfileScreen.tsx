@@ -415,8 +415,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: Spacing.lg,
-    paddingHorizontal: Spacing.md,
-    minHeight: 120,
+    paddingHorizontal: Spacing.sm,
+    minHeight: 140,
   },
   statValue: {
     color: Colors.dark.accent,
@@ -427,8 +427,9 @@ const styles = StyleSheet.create({
   statLabel: {
     opacity: 0.6,
     textAlign: "center",
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 11,
+    lineHeight: 14,
+    width: "100%",
   },
   menuSection: {
     marginBottom: Spacing.md,
