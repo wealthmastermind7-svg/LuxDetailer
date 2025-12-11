@@ -209,12 +209,7 @@ See `design_guidelines.md` for comprehensive design specifications including:
 
 ## Recent Changes
 
-### December 11, 2025 (Final)
-- **Complete**: App Store submission ready
-  - Privacy Policy with contact email admin@cerolauto.com
-  - Marketing website showcasing all features and membership plans
-  - Custom domain configured: https://luxdetailer.cerolauto.store
-  - URLs ready for Apple App Store and Google Play
+### December 11, 2025
 - **Fixed**: Automatic seeding of membership plans on server startup
   - Plans now populate before server starts listening
   - Ensures API returns membership data immediately
@@ -250,16 +245,3 @@ See `design_guidelines.md` for comprehensive design specifications including:
 
 ## Repository
 This is a **complete single repository** with both frontend and backend. No additional repositories are needed.
-
-## Deployment & Custom Domain
-
-### Custom Domain
-- **Domain**: https://luxdetailer.cerolauto.store
-- **Contact Email**: admin@cerolauto.com
-
-### App Store Submission URLs
-- **Privacy Policy**: https://luxdetailer.cerolauto.store/privacy-policy.html
-- **Marketing Website**: https://luxdetailer.cerolauto.store/marketing.html
-
-### DNS Configuration
-To use the custom domain, point your DNS records to your hosting provider's nameservers.
