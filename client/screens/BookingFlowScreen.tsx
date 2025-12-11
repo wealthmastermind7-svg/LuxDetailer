@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { ScrollView, View, StyleSheet, Pressable, TextInput, ActivityIndicator, Alert } from "react-native";
+import { ScrollView, View, StyleSheet, Pressable, TextInput, ActivityIndicator, Alert, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
@@ -16,6 +16,7 @@ import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollV
 import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { apiRequest } from "@/lib/query-client";
+import { useAuth } from "@/contexts/AuthContext";
 
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
 type RouteType = RouteProp<{ BookingFlow: { serviceId?: string; addOns?: string[]; totalPrice?: number } }, "BookingFlow">;
@@ -49,6 +50,12 @@ const ADD_ON_NAMES: Record<string, { name: string; price: number }> = {
   "6": { name: "Pet Hair Removal", price: 59 },
 };
 
+const LOCATION_PRESETS = [
+  { id: "home", label: "Home", icon: "home" as const, hint: "Your home address" },
+  { id: "office", label: "Office", icon: "briefcase" as const, hint: "Your work address" },
+  { id: "other", label: "Other", icon: "map-pin" as const, hint: "Enter address" },
+];
+
 function generateDates(): { day: string; date: string; month: string; fullDate: string }[] {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -74,6 +81,7 @@ export default function BookingFlowScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteType>();
   const queryClient = useQueryClient();
+  const { isAuthenticated, login, register } = useAuth();
   
   const preSelectedServiceId = route.params?.serviceId;
   const preSelectedAddOns = route.params?.addOns || [];
@@ -88,8 +96,16 @@ export default function BookingFlowScreen() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedDateDisplay, setSelectedDateDisplay] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedLocationType, setSelectedLocationType] = useState<string | null>(null);
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState(false);
 
   const DATES = generateDates();
 
@@ -137,22 +153,66 @@ export default function BookingFlowScreen() {
     },
   });
 
+  const submitBooking = () => {
+    if (selectedService && selectedDate && selectedTime && location.length > 0) {
+      createBookingMutation.mutate({
+        serviceId: selectedService,
+        date: selectedDate,
+        time: selectedTime,
+        location,
+        notes: notes || undefined,
+        totalPrice: calculatedTotalPrice.toFixed(2),
+        addOns: selectedAddOns.length > 0 ? JSON.stringify(selectedAddOns) : undefined,
+      });
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!loginUsername || !loginPassword) {
+      setLoginError("Please enter username and password");
+      return;
+    }
+    setIsLoggingIn(true);
+    setLoginError(null);
+    try {
+      if (isRegistering) {
+        await register(loginUsername, loginPassword);
+      } else {
+        await login(loginUsername, loginPassword);
+      }
+      setShowLoginModal(false);
+      setLoginUsername("");
+      setLoginPassword("");
+      if (pendingSubmit) {
+        submitBooking();
+        setPendingSubmit(false);
+      }
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : "Login failed");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
   const handleNext = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      if (selectedService && selectedDate && selectedTime) {
-        createBookingMutation.mutate({
-          serviceId: selectedService,
-          date: selectedDate,
-          time: selectedTime,
-          location,
-          notes: notes || undefined,
-          totalPrice: calculatedTotalPrice.toFixed(2),
-          addOns: selectedAddOns.length > 0 ? JSON.stringify(selectedAddOns) : undefined,
-        });
+      if (createBookingMutation.isPending || pendingSubmit) {
+        return;
       }
+      if (!location || location.length === 0) {
+        Alert.alert("Missing Address", "Please enter your service address.");
+        return;
+      }
+      if (!isAuthenticated) {
+        setPendingSubmit(true);
+        setLoginError(null);
+        setShowLoginModal(true);
+        return;
+      }
+      submitBooking();
     }
   };
 
@@ -169,7 +229,7 @@ export default function BookingFlowScreen() {
       case "Service": return !!selectedService;
       case "Date": return !!selectedDate;
       case "Time": return !!selectedTime;
-      case "Location": return location.length > 0;
+      case "Location": return !!selectedLocationType && location.length > 0;
       case "Confirm": return true;
       default: return false;
     }
@@ -319,32 +379,64 @@ export default function BookingFlowScreen() {
               Service Location
             </ThemedText>
             <ThemedText type="body" style={styles.stepSubtitle}>
-              Where should we come to detail your vehicle?
+              Where should we detail your vehicle?
             </ThemedText>
+            <View style={styles.locationGrid}>
+              {LOCATION_PRESETS.map((preset) => (
+                <Pressable
+                  key={preset.id}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setSelectedLocationType(preset.id);
+                    setLocation("");
+                  }}
+                  style={({ pressed }) => [
+                    styles.locationCard,
+                    selectedLocationType === preset.id && styles.locationCardSelected,
+                    pressed && styles.locationCardPressed,
+                  ]}
+                >
+                  <Feather
+                    name={preset.icon}
+                    size={28}
+                    color={selectedLocationType === preset.id ? Colors.dark.accent : Colors.dark.text}
+                  />
+                  <ThemedText
+                    type="body"
+                    style={[
+                      styles.locationLabel,
+                      selectedLocationType === preset.id && styles.locationLabelSelected,
+                    ]}
+                  >
+                    {preset.label}
+                  </ThemedText>
+                </Pressable>
+              ))}
+            </View>
+            {selectedLocationType ? (
+              <GlassCard style={styles.inputCard}>
+                <ThemedText type="small" style={styles.inputLabel}>
+                  {LOCATION_PRESETS.find(p => p.id === selectedLocationType)?.hint || "Address"}
+                </ThemedText>
+                <TextInput
+                  style={styles.textInput}
+                  value={location}
+                  onChangeText={setLocation}
+                  placeholder="123 Main St, City, State"
+                  placeholderTextColor={Colors.dark.textSecondary}
+                />
+              </GlassCard>
+            ) : null}
             <GlassCard style={styles.inputCard}>
               <ThemedText type="small" style={styles.inputLabel}>
-                Address
-              </ThemedText>
-              <TextInput
-                style={styles.textInput}
-                value={location}
-                onChangeText={setLocation}
-                placeholder="Enter your address"
-                placeholderTextColor={Colors.dark.textSecondary}
-                multiline
-              />
-            </GlassCard>
-            <GlassCard style={styles.inputCard}>
-              <ThemedText type="small" style={styles.inputLabel}>
-                Special Instructions (Optional)
+                Notes (Optional)
               </ThemedText>
               <TextInput
                 style={styles.textInput}
                 value={notes}
                 onChangeText={setNotes}
-                placeholder="Gate code, parking instructions, etc."
+                placeholder="Gate code, parking spot, etc."
                 placeholderTextColor={Colors.dark.textSecondary}
-                multiline
               />
             </GlassCard>
           </View>
@@ -481,6 +573,82 @@ export default function BookingFlowScreen() {
           </Button>
         </View>
       </View>
+
+      <Modal
+        visible={showLoginModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => {
+          setShowLoginModal(false);
+          setPendingSubmit(false);
+          setLoginError(null);
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">
+                {isRegistering ? "Create Account" : "Sign In"}
+              </ThemedText>
+              <Pressable onPress={() => {
+                setShowLoginModal(false);
+                setPendingSubmit(false);
+                setLoginError(null);
+              }}>
+                <Feather name="x" size={24} color={Colors.dark.text} />
+              </Pressable>
+            </View>
+            <ThemedText type="body" style={styles.modalSubtitle}>
+              {isRegistering 
+                ? "Create an account to book your appointment"
+                : "Sign in to complete your booking"}
+            </ThemedText>
+            {loginError ? (
+              <View style={styles.errorBox}>
+                <ThemedText type="small" style={styles.errorText}>{loginError}</ThemedText>
+              </View>
+            ) : null}
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Username"
+              placeholderTextColor={Colors.dark.textSecondary}
+              value={loginUsername}
+              onChangeText={setLoginUsername}
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Password"
+              placeholderTextColor={Colors.dark.textSecondary}
+              value={loginPassword}
+              onChangeText={setLoginPassword}
+              secureTextEntry
+            />
+            <Button 
+              onPress={handleLogin} 
+              disabled={isLoggingIn}
+              style={styles.modalButton}
+            >
+              {isLoggingIn 
+                ? "Please wait..." 
+                : isRegistering ? "Create Account" : "Sign In"}
+            </Button>
+            <Pressable 
+              onPress={() => {
+                setIsRegistering(!isRegistering);
+                setLoginError(null);
+              }}
+              style={styles.switchAuthMode}
+            >
+              <ThemedText type="small" style={styles.switchAuthText}>
+                {isRegistering 
+                  ? "Already have an account? Sign in" 
+                  : "Need an account? Create one"}
+              </ThemedText>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -718,5 +886,82 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 12,
     elevation: 10,
+  },
+  locationGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: Spacing.md,
+    marginBottom: Spacing.lg,
+  },
+  locationCard: {
+    flex: 1,
+    paddingVertical: Spacing.lg,
+    backgroundColor: Colors.dark.backgroundSecondary,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  locationCardSelected: {
+    borderColor: Colors.dark.accent,
+    backgroundColor: "rgba(10, 132, 255, 0.15)",
+  },
+  locationCardPressed: {
+    opacity: 0.8,
+  },
+  locationLabel: {
+    marginTop: Spacing.sm,
+  },
+  locationLabelSelected: {
+    color: Colors.dark.accent,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: Colors.dark.backgroundDefault,
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
+    padding: Spacing.xl,
+    paddingBottom: Spacing.xl * 2,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: Spacing.sm,
+  },
+  modalSubtitle: {
+    opacity: 0.7,
+    marginBottom: Spacing.lg,
+  },
+  errorBox: {
+    backgroundColor: "rgba(255, 59, 48, 0.2)",
+    padding: Spacing.md,
+    borderRadius: BorderRadius.sm,
+    marginBottom: Spacing.md,
+  },
+  errorText: {
+    color: "#FF3B30",
+  },
+  modalInput: {
+    backgroundColor: Colors.dark.backgroundSecondary,
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.md,
+    color: Colors.dark.text,
+    fontSize: 16,
+    marginBottom: Spacing.md,
+  },
+  modalButton: {
+    marginTop: Spacing.sm,
+  },
+  switchAuthMode: {
+    alignItems: "center",
+    marginTop: Spacing.lg,
+  },
+  switchAuthText: {
+    color: Colors.dark.accent,
   },
 });
