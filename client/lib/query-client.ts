@@ -2,19 +2,29 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { getAuthToken } from "@/contexts/AuthContext";
 
 /**
- * Gets the base URL for the Express API server (e.g., "http://localhost:3000")
+ * Gets the base URL for the Express API server
  * @returns {string} The API base URL
  */
 export function getApiUrl(): string {
   let host = process.env.EXPO_PUBLIC_DOMAIN;
 
+  // Fallback for development/testing
   if (!host) {
-    throw new Error("EXPO_PUBLIC_DOMAIN is not set");
+    host = 'localhost:5000';
+    console.warn('[API] EXPO_PUBLIC_DOMAIN not set, using fallback:', host);
   }
 
-  let url = new URL(`https://${host}`);
-
-  return url.href;
+  // Determine protocol: HTTPS for non-localhost, HTTP for localhost
+  const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
+  const protocol = isLocal ? 'http' : 'https';
+  
+  try {
+    const url = new URL(`${protocol}://${host}`);
+    return url.href;
+  } catch (error) {
+    console.error('[API] Failed to construct URL:', { host, protocol, error });
+    throw new Error(`Invalid API URL: ${protocol}://${host}`);
+  }
 }
 
 async function throwIfResNotOk(res: Response) {
