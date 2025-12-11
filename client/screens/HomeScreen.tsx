@@ -142,7 +142,7 @@ export default function HomeScreen() {
           
           <GlassCard onPress={handleRewardsPress} style={styles.quickActionCard}>
             <Feather name="gift" size={28} color={Colors.dark.accentGreen} />
-            <ThemedText type="small" style={styles.quickActionLabel}>
+            <ThemedText type="small" style={styles.quickActionLabel} numberOfLines={1}>
               Rewards
             </ThemedText>
           </GlassCard>
@@ -278,6 +278,7 @@ const styles = StyleSheet.create({
   quickActionLabel: {
     marginTop: Spacing.sm,
     textAlign: "center",
+    fontSize: 13,
   },
   sectionHeader: {
     flexDirection: "row",
