@@ -229,7 +229,7 @@ export default function BookingFlowScreen() {
       case "Service": return !!selectedService;
       case "Date": return !!selectedDate;
       case "Time": return !!selectedTime;
-      case "Location": return !!selectedLocationType && location.length > 0;
+      case "Location": return !!selectedLocationType;
       case "Confirm": return true;
       default: return false;
     }
