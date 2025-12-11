@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     flex: 1,
-    maxWidth: 75,
+    maxWidth: 85,
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
