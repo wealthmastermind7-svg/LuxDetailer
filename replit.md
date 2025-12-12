@@ -1,7 +1,7 @@
-# LuxDetailer - Premium Mobile Car Detailing App
+# Teggy's Elite Detailing - Premium Mobile Car Detailing App
 
 ## Overview
-LuxDetailer is a premium mobile car detailing application built with Expo (React Native). The app features a luxury automotive aesthetic with glassmorphism UI, bold oversized typography, and fluid 60fps animations. Users can browse services, book appointments, manage their vehicles, track their detailing history, and subscribe to membership plans. The app includes secure authentication with Bearer tokens, role-based access control, and a complete business owner admin view.
+Teggy's Elite Detailing is a premium mobile car detailing application built with Expo (React Native). The app features luxury automotive aesthetic with glassmorphism UI, bold oversized typography, and fluid 60fps animations. Users can browse services (ceramic coatings, paint protection film, paint correction, vinyl wraps, powder coating, window tinting, detailing), book appointments, manage their vehicles, track their detailing history, and subscribe to membership plans. The app includes secure authentication with Bearer tokens, role-based access control, and a complete business owner admin view.
 
 ## Project Architecture
 
@@ -209,16 +209,20 @@ See `design_guidelines.md` for comprehensive design specifications including:
 
 ## Recent Changes
 
+### December 12, 2025 - Teggy's Elite Detailing Rebranding
+- **Complete**: App rebranding from LuxDetailer to Teggy's Elite Detailing
+  - Updated app name, slug, and branding throughout
+  - Generated professional app icon reflecting premium automotive detailing aesthetic
+  - Updated color theme from cyan (#0A84FF) to professional blue (#1E90FF)
+  - Updated design guidelines with Teggy's brand specifications
+  - Updated services catalog to match Teggy's Elite Detailing offerings:
+    - Ceramic Coating, Paint Protection Film, Paint Correction, Vinyl Wraps, Powder Coating, Window Tinting, Full Detailing, Express Wash, Interior Detail, Premium Bundle
+  - Header now displays "Teggy's Elite" branding
+  - Maintained all existing app functionality with new brand identity
+
 ### December 11, 2025
 - **Fixed**: Automatic seeding of services and membership plans on server startup
-  - Services and plans now populate before server starts listening
-  - Ensures API returns full catalog data immediately on deployment
-  - 10 services: Express Exterior, Gold Wash, Platinum Wash, Scratch Removal, Interior Detail, Deluxe Detail, Signature Detail, Diamond Ceramic, Titanium Gloss, Window Tinting
-  - Three membership plans: Weekly Wash Club, Fortnightly Fresh, Monthly Maintain
 - **Complete**: Membership system integration
-  - Added MembershipsScreen to HomeStackNavigator
-  - Integrated "Memberships" quick action on Home screen
-  - Full subscription lifecycle (view plans, subscribe, manage, cancel)
 
 ### December 9, 2025
 - Initial implementation of complete LuxDetailer app
