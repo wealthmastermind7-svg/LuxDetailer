@@ -16,7 +16,13 @@ export function HeaderTitle({ title = "Teggy's Elite" }: HeaderTitleProps) {
         style={styles.icon}
         resizeMode="contain"
       />
-      <ThemedText style={styles.title}>{title}</ThemedText>
+      <ThemedText 
+        type="h4" 
+        numberOfLines={1}
+        style={styles.title}
+      >
+        {title}
+      </ThemedText>
     </View>
   );
 }
@@ -26,17 +32,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
+    flex: 1,
+    maxWidth: 250,
   },
   icon: {
     width: 32,
     height: 32,
     marginRight: Spacing.sm,
     borderRadius: 8,
+    flexShrink: 0,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "700",
     color: Colors.dark.text,
     letterSpacing: 0.5,
+    flex: 1,
   },
 });
