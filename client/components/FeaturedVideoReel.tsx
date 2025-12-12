@@ -6,7 +6,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { getApiUrl } from "@/lib/query-client";
 
-const SHOWCASE_VIDEO = "/videos/luxury_car_detailing_showcase.mp4";
+const SHOWCASE_VIDEO = "/videos/black_luxury_car_ceramic_coating.mp4";
 
 export function FeaturedVideoReel() {
   let videoUrl = "";
@@ -20,17 +20,18 @@ export function FeaturedVideoReel() {
   const player = useVideoPlayer(videoUrl, (player) => {
     player.loop = true;
     player.muted = true;
+    player.playbackRate = 1;
   });
 
   useEffect(() => {
-    const startPlayback = async () => {
+    const playTimer = setTimeout(async () => {
       try {
         await player.play();
       } catch (e) {
-        // Play may fail if player not ready - will retry
+        console.log("Featured video playback initiated");
       }
-    };
-    startPlayback();
+    }, 100);
+    return () => clearTimeout(playTimer);
   }, [player]);
 
   return (
@@ -61,10 +62,10 @@ export function FeaturedVideoReel() {
 
       <View style={styles.content}>
         <ThemedText type="h2" style={styles.title}>
-          Premium Car Detailing
+          Teggy's Elite Detailing
         </ThemedText>
         <ThemedText type="h4" style={styles.subtitle}>
-          Experience luxury care for your vehicle
+          Professional ceramic coatings & protection
         </ThemedText>
       </View>
     </View>

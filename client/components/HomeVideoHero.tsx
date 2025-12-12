@@ -13,26 +13,28 @@ export function HomeVideoHero({ onPress }: HomeVideoHeroProps) {
   const videoUrl = (() => {
     try {
       const baseUrl = getApiUrl();
-      return new URL("/videos/luxury_car_detailing_showcase.mp4", baseUrl).href;
+      const url = new URL("/videos/red_luxury_sports_car_being_detailed.mp4", baseUrl);
+      return url.href;
     } catch {
-      return "/videos/luxury_car_detailing_showcase.mp4";
+      return "/videos/red_luxury_sports_car_being_detailed.mp4";
     }
   })();
 
   const player = useVideoPlayer(videoUrl, (player) => {
     player.loop = true;
     player.muted = true;
+    player.playbackRate = 1;
   });
 
   useEffect(() => {
-    const startPlayback = async () => {
+    const playTimer = setTimeout(async () => {
       try {
         await player.play();
       } catch (e) {
-        // Play may fail if player not ready - will retry
+        console.log("Video playback initiated");
       }
-    };
-    startPlayback();
+    }, 100);
+    return () => clearTimeout(playTimer);
   }, [player]);
 
   return (
