@@ -209,16 +209,24 @@ See `design_guidelines.md` for comprehensive design specifications including:
 
 ## Recent Changes
 
-### December 12, 2025 - Teggy's Elite Detailing Rebranding
-- **Complete**: App rebranding from LuxDetailer to Teggy's Elite Detailing
+### December 12, 2025 - Teggy's Elite Detailing Rebranding & Video Optimization
+- **Complete**: Full app rebranding to Teggy's Elite Detailing
   - Updated app name, slug, and branding throughout
   - Generated professional app icon reflecting premium automotive detailing aesthetic
   - Updated color theme from cyan (#0A84FF) to professional blue (#1E90FF)
   - Updated design guidelines with Teggy's brand specifications
-  - Updated services catalog to match Teggy's Elite Detailing offerings:
-    - Ceramic Coating, Paint Protection Film, Paint Correction, Vinyl Wraps, Powder Coating, Window Tinting, Full Detailing, Express Wash, Interior Detail, Premium Bundle
+  - Updated services catalog to match Teggy's Elite Detailing offerings
   - Header now displays "Teggy's Elite" branding
-  - Maintained all existing app functionality with new brand identity
+
+- **Complete**: Video looping optimization for TestFlight reliability
+  - Implemented proper looping using player.loop = true (Expo best practice)
+  - Added delayed playback start (100ms) to ensure video player readiness
+  - Created CinematicVideoFallback component with light sweep animation for fallback
+  - Created ServiceVideoHero component with video fallback to cinematic effect
+  - Updated HomeVideoHero and FeaturedVideoReel with improved looping
+  - Videos now use H.264 MP4 format (compatible with all iOS/Android devices)
+  - Videos mapped to services: Ceramic Coating, Paint Correction, Interior Detail, etc.
+  - Fallback ensures smooth experience if video fails to load in TestFlight
 
 ### December 11, 2025
 - **Fixed**: Automatic seeding of services and membership plans on server startup

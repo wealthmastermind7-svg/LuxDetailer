@@ -1,0 +1,206 @@
+Below is a practical, iOS-focused answer tailored to premium car detailing apps, with emphasis on smooth playback, TestFlight reliability, and cinematic alternatives beyond simple loops.
+
+⸻
+
+1. Best Looping Video Format for iOS Apps
+
+Recommended Standard (Most Reliable)
+
+H.264 (AVC) in MP4 container
+	•	Resolution: 1080p (1920×1080) or 720p
+	•	Frame rate: 30 fps (60 fps only if truly necessary)
+	•	Profile: High
+	•	Audio: None (remove audio track entirely)
+	•	Bitrate: 8–12 Mbps (1080p)
+
+Why this works best
+	•	Hardware accelerated on all iOS devices
+	•	Most stable in TestFlight and App Store builds
+	•	Lowest chance of silent failures or non-looping issues
+	•	Smaller file size than HEVC with near-identical quality for UI loops
+
+AVPlayer Configuration (Critical)
+
+Looping failures in TestFlight are almost always code-level, not format-level.
+
+You must use:
+
+actionAtItemEnd = .none
+
+and observe:
+
+AVPlayerItemDidPlayToEndTime
+
+Then seek back to .zero.
+
+Avoid
+	•	.play() inside onAppear repeatedly
+	•	Recreating AVPlayer on every render
+	•	Audio tracks (even muted ones)
+
+⸻
+
+HEVC (H.265): Use with Caution
+
+Pros
+	•	Smaller file size
+	•	Higher quality at same bitrate
+
+Cons
+	•	Inconsistent looping in TestFlight
+	•	Occasional black frames at loop point
+	•	Older devices may stutter
+
+Recommendation
+Use HEVC only for long hero videos, not UI loops.
+
+⸻
+
+ProRes: Not Recommended
+	•	Extremely large files
+	•	No benefit once compressed
+	•	App Store size penalties
+
+⸻
+
+2. Encoding Settings That Prevent Loop Glitches
+
+When exporting from Premiere Pro, Final Cut, or DaVinci Resolve:
+	•	Keyframe interval: 1 second
+	•	No variable frame rate
+	•	No B-frames if possible
+	•	No audio track
+	•	No HDR metadata
+	•	Color space: Rec.709
+
+These settings eliminate the 1-frame flash that breaks seamless loops.
+
+⸻
+
+3. Cinematic Alternatives to Looping Videos (Highly Recommended)
+
+For luxury car detailing apps, looping videos are often overused. Below are higher-end cinematic techniques that feel premium, lighter, and more reliable.
+
+⸻
+
+A. Cinemagraphs (Best Replacement)
+
+What it is
+	•	Still image with subtle motion (steam, water beads, reflections)
+
+Why it works
+	•	Feels cinematic without distraction
+	•	Extremely small file size
+	•	No visible loop seam
+	•	Perfect for hero sections and service pages
+
+Implementation
+	•	PNG + masked MP4
+	•	Loop 2–3 second motion only
+
+⸻
+
+B. Parallax + Light Sweep Animations
+
+Effect
+	•	Static background
+	•	Moving light sweep across paint
+	•	Depth created via parallax
+
+Tools
+	•	Lottie
+	•	Skia / Rive
+	•	Reanimated + SVG masks
+
+Why it outperforms video
+	•	60fps native animation
+	•	Zero playback bugs
+	•	Ultra-premium feel
+
+⸻
+
+C. Procedural Particle Effects (Water, Steam, Foam)
+
+Use cases
+	•	Ceramic coating pages
+	•	Steam cleaning services
+	•	Interior detailing
+
+Implementation
+	•	GPU shaders
+	•	Canvas based animation
+	•	Expo GL or Skia
+
+Why it is powerful
+	•	Dynamic, never repeats exactly
+	•	No video files required
+	•	Feels “alive”
+
+⸻
+
+D. Camera Pan Over Ultra-High-Res Still
+
+Technique
+	•	6K still image
+	•	Slow Ken Burns pan (10–15s)
+	•	Reset invisibly
+
+Advantages
+	•	Zero compression artifacts
+	•	Looks like cinema camera movement
+	•	Extremely stable in TestFlight
+
+⸻
+
+E. Micro-Motion UI Cinematics
+
+Instead of video, animate:
+	•	Floating gloss highlights
+	•	Dust particles
+	•	Soft reflections
+	•	Depth blur layers
+
+Stack
+	•	Reanimated
+	•	Moti
+	•	Skia
+
+This is how Apple Fitness, Tesla, and Porsche apps achieve cinematic feel without video.
+
+⸻
+
+4. Recommended Stack for a Premium Detailing App
+
+Best Practice Setup
+	•	Hero section: Cinemagraph or light sweep
+	•	Service pages: Procedural particles
+	•	Gallery: Slow pan stills
+	•	Accents: Micro-motion highlights
+	•	Videos only for:
+	•	Before/after reels
+	•	Social proof
+	•	Short testimonials
+
+This reduces app size, improves stability, and elevates perceived quality.
+
+⸻
+
+5. If You Still Want Perfect Video Loops
+
+Use this checklist:
+	•	H.264 MP4
+	•	30 fps
+	•	No audio
+	•	Keyframe every 1s
+	•	Single AVPlayer instance
+	•	.actionAtItemEnd = .none
+	•	Observer-based looping
+
+This combination eliminates 95 percent of TestFlight looping failures.
+
+⸻
+
+If you want, I can:
+	•	Audit your current video export settings
+	•	Recommend exact resolutions and durations per screen
+	•	Design a cinematic system specifically for your detailing brand (luxury, aggressive, minimal, or neon)

@@ -20,18 +20,18 @@ export function FeaturedVideoReel() {
   const player = useVideoPlayer(videoUrl, (player) => {
     player.loop = true;
     player.muted = true;
-    player.playbackRate = 1;
   });
 
   useEffect(() => {
-    const playTimer = setTimeout(async () => {
+    if (!player) return;
+    const timer = setTimeout(() => {
       try {
-        await player.play();
+        player.play();
       } catch (e) {
-        console.log("Featured video playback initiated");
+        console.log("Featured video playback retry");
       }
     }, 100);
-    return () => clearTimeout(playTimer);
+    return () => clearTimeout(timer);
   }, [player]);
 
   return (
