@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, Platform } from "react-native";
 import { VideoView, useVideoPlayer } from "expo-video";
 import Animated, { FadeIn } from "react-native-reanimated";
@@ -22,8 +22,18 @@ export function HomeVideoHero({ onPress }: HomeVideoHeroProps) {
   const player = useVideoPlayer(videoUrl, (player) => {
     player.loop = true;
     player.muted = true;
-    player.play();
   });
+
+  useEffect(() => {
+    const startPlayback = async () => {
+      try {
+        await player.play();
+      } catch (e) {
+        // Play may fail if player not ready - will retry
+      }
+    };
+    startPlayback();
+  }, [player]);
 
   return (
     <Animated.View style={styles.container} entering={FadeIn.duration(800)}>

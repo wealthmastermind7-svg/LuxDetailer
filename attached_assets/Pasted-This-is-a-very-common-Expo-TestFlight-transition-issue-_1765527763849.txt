@@ -1,0 +1,144 @@
+This is a very common Expo ➜ TestFlight transition issue on iOS, and the behaviour you are seeing is expected unless a few iOS specific requirements are met.
+
+Below is a precise diagnosis and fix path, based on the fact that it works in Expo Go but not in a standalone TestFlight build.
+
+⸻
+
+Why it works in Expo Go but fails in TestFlight
+
+Expo Go runs inside a privileged container that relaxes several iOS media restrictions.
+Once you build a standalone app (TestFlight), iOS enforces native AVPlayer rules.
+
+On iOS, videos will NOT auto play or loop unless all of the following are true:
+	1.	The video is muted
+	2.	shouldPlay is explicitly set
+	3.	isLooping is explicitly set
+	4.	The video is fully loaded before play
+	5.	The video source is reachable at runtime (not a dev only asset)
+	6.	No user gesture requirement is violated
+
+If any one of these fails, iOS silently blocks playback. No error is thrown.
+
+⸻
+
+The most common causes in your case
+
+Based on your UI and symptoms, the top issues are almost certainly:
+
+1. isMuted is missing (this is the #1 cause)
+
+iOS will not autoplay unmuted video, even if looping.
+
+Expo Go ignores this rule. TestFlight does not.
+
+2. useNativeControls={false} without proper audio mode
+
+When controls are disabled, iOS expects explicit playback management.
+
+3. Asset resolution difference
+
+If your video is referenced via a local relative path that works in Expo Go, it may not be bundled correctly in the production build.
+
+⸻
+
+Correct, production safe Expo AV configuration (REQUIRED)
+
+Use this exact pattern.
+
+Video component (Expo AV)
+
+import { Video, ResizeMode } from 'expo-av';
+import { useRef, useEffect } from 'react';
+
+const videoRef = useRef<Video>(null);
+
+<Video
+  ref={videoRef}
+  source={require('../assets/hero-loop.mp4')} // OR a remote HTTPS URL
+  style={{ width: '100%', height: '100%' }}
+  resizeMode={ResizeMode.COVER}
+  isMuted={true}              // REQUIRED for iOS autoplay
+  shouldPlay={true}           // REQUIRED
+  isLooping={true}            // REQUIRED
+  useNativeControls={false}
+  playsInSilentModeIOS={true} // IMPORTANT
+  ignoreSilentSwitch="ignore" // IMPORTANT
+/>
+
+
+⸻
+
+Mandatory Audio Mode Configuration (often forgotten)
+
+Add this once, near app startup.
+
+import { Audio } from 'expo-av';
+
+useEffect(() => {
+  Audio.setAudioModeAsync({
+    playsInSilentModeIOS: true,
+    staysActiveInBackground: false,
+    interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+  });
+}, []);
+
+Without this, iOS may block playback on physical devices even if muted.
+
+⸻
+
+If you are using a REMOTE video URL
+
+Ensure ALL of the following:
+	•	HTTPS only
+	•	No redirects
+	•	Proper Content-Type: video/mp4
+	•	Hosted somewhere stable (not localhost, not ngrok)
+
+Bad example:
+
+http://localhost:3000/video.mp4
+
+Good example:
+
+https://cdn.yoursite.com/luxdetailer/hero-loop.mp4
+
+
+⸻
+
+If the video is showing the “muted play icon” (your screenshot)
+
+That icon confirms AVPlayer is loaded but autoplay was blocked.
+This means one of the autoplay conditions failed, almost always isMuted.
+
+⸻
+
+iOS specific gotchas checklist
+
+Before rebuilding, confirm all are true:
+	•	Video is muted
+	•	shouldPlay={true} is set
+	•	isLooping={true} is set
+	•	Audio mode configured
+	•	Video file is bundled or remotely accessible
+	•	No conditional rendering that unmounts the component
+	•	No paused state tied to navigation focus
+
+⸻
+
+Final step
+
+After making these changes:
+	1.	Increment build number
+	2.	Rebuild with EAS
+	3.	Upload new TestFlight build
+	4.	Test on a physical iPhone (not simulator)
+
+⸻
+
+If you want, next I can:
+	•	Review your exact Video component code
+	•	Check your asset bundling config
+	•	Provide a bulletproof reusable <LoopingHeroVideo /> component
+	•	Diagnose navigation focus issues if this is inside a tab screen
+
+Just paste the Video code you are using.

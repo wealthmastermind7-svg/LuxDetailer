@@ -15,6 +15,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Colors } from "@/constants/theme";
 
 export default function App() {
+
   return (
     <ErrorBoundary>
       <AuthProvider>

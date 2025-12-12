@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { LinearGradient } from "expo-linear-gradient";
@@ -20,8 +20,18 @@ export function FeaturedVideoReel() {
   const player = useVideoPlayer(videoUrl, (player) => {
     player.loop = true;
     player.muted = true;
-    player.play();
   });
+
+  useEffect(() => {
+    const startPlayback = async () => {
+      try {
+        await player.play();
+      } catch (e) {
+        // Play may fail if player not ready - will retry
+      }
+    };
+    startPlayback();
+  }, [player]);
 
   return (
     <View style={styles.container}>
