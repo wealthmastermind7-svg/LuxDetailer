@@ -209,6 +209,16 @@ See `design_guidelines.md` for comprehensive design specifications including:
 
 ## Recent Changes
 
+### December 17, 2025 - App Renamed & Clean Cinematic
+- **Complete**: App renamed to MyCustomIOSApp
+  - Updated app name, slug, and scheme
+  - Updated iOS bundle identifier: com.mycustomiosapp.app
+  - Updated Android package: com.mycustomiosapp.app
+  
+- **Complete**: Removed all text labels from cinematic
+  - Cleaned up stage labels (Washing, Coating, Polishing)
+  - Pure animation experience without text overlays
+
 ### December 17, 2025 - Realistic Car Detailing Cinematic Experience
 - **Complete**: Replaced looping videos with realistic detailing process cinematic
   - Created CarDetailingCinematic component with 3-stage cycling animation
