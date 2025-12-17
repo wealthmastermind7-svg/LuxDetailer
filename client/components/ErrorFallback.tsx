@@ -59,7 +59,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
 
       <View style={styles.content}>
         <ThemedText type="h1" style={styles.title}>
-          Oops! LuxDetailer hit a bump
+          Oops! MyCustomIOSApp hit a bump
         </ThemedText>
 
         <ThemedText type="body" style={styles.message}>
@@ -81,7 +81,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             type="body"
             style={[styles.buttonText, { color: theme.buttonText }]}
           >
-            Restart LuxDetailer
+            Restart MyCustomIOSApp
           </ThemedText>
         </Pressable>
       </View>

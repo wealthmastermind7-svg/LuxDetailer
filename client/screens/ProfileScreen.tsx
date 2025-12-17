@@ -348,7 +348,7 @@ export default function ProfileScreen() {
         </GlassCard>
 
         <ThemedText type="caption" style={styles.version}>
-          LuxDetailer v1.0.0
+          MyCustomIOSApp v1.0.0
         </ThemedText>
       </ScrollView>
     </View>

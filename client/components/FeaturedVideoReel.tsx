@@ -17,7 +17,7 @@ export function FeaturedVideoReel() {
 
       <View style={styles.content}>
         <ThemedText type="h2" numberOfLines={1} style={styles.title}>
-          Teggy's Elite
+          MyCustomIOSApp
         </ThemedText>
         <ThemedText type="small" numberOfLines={1} style={styles.subtitle}>
           Premium ceramic coatings

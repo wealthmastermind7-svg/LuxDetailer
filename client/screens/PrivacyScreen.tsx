@@ -25,7 +25,7 @@ export default function PrivacyScreen() {
         <GlassCard style={styles.section}>
           <ThemedText type="h3" style={styles.heading}>Privacy Policy</ThemedText>
           <ThemedText type="body" style={styles.text}>
-            LuxDetailer is committed to protecting your privacy. We collect and use your information only to provide our services and improve your experience.
+            MyCustomIOSApp is committed to protecting your privacy. We collect and use your information only to provide our services and improve your experience.
           </ThemedText>
         </GlassCard>
 

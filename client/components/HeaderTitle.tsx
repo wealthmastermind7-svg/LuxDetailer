@@ -8,7 +8,7 @@ interface HeaderTitleProps {
   title?: string;
 }
 
-export function HeaderTitle({ title = "Teggy's Elite" }: HeaderTitleProps) {
+export function HeaderTitle({ title = "MyCustomIOSApp" }: HeaderTitleProps) {
   return (
     <View style={styles.container}>
       <Image
