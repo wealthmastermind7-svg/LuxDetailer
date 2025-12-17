@@ -11,7 +11,7 @@ import { queryClient } from "@/lib/query-client";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { MascotProvider } from "@/contexts/MascotContext";
 
-import RootStackNavigator from "@/navigation/RootStackNavigator";
+import RootStackNavigator, { linkingConfig } from "@/navigation/RootStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { MascotDisplay } from "@/components/MascotDisplay";
 import { Colors } from "@/constants/theme";
@@ -27,6 +27,7 @@ export default function App() {
               <KeyboardProvider>
                 <MascotProvider>
                   <NavigationContainer
+                  linking={linkingConfig}
                   theme={{
                     dark: true,
                     colors: {
