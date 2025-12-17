@@ -153,30 +153,34 @@ export function CarDetailingCinematic({
             <View style={styles.doorLine} />
           </View>
 
-          {/* Neon Headlights - Left */}
-          <Animated.View style={[styles.headlightLeftOuter, neonGlowStyle]}>
-            <Animated.View style={[styles.headlightLeftContainer, headlightStyle]}>
+          {/* LED Headlights - Left */}
+          <Animated.View style={[styles.ledHeadlightLeft, headlightStyle]}>
+            <View style={styles.ledHousingLeft}>
               <LinearGradient
-                colors={["#00FFFF", "#00CCFF", "#0099FF"]}
+                colors={["#1a1a1a", "#2a2a2a", "#1a1a1a"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
-              <View style={styles.neonBorder} />
-            </Animated.View>
+              {/* LED elements */}
+              <View style={styles.ledElement} />
+              <View style={[styles.ledElement, styles.ledElementOffset]} />
+            </View>
           </Animated.View>
 
-          {/* Neon Headlights - Right */}
-          <Animated.View style={[styles.headlightRightOuter, neonGlowStyle]}>
-            <Animated.View style={[styles.headlightRightContainer, headlightStyle]}>
+          {/* LED Headlights - Right */}
+          <Animated.View style={[styles.ledHeadlightRight, headlightStyle]}>
+            <View style={styles.ledHousingRight}>
               <LinearGradient
-                colors={["#00FFFF", "#00CCFF", "#0099FF"]}
-                start={{ x: 1, y: 0 }}
-                end={{ x: 0, y: 1 }}
+                colors={["#1a1a1a", "#2a2a2a", "#1a1a1a"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
-              <View style={styles.neonBorder} />
-            </Animated.View>
+              {/* LED elements */}
+              <View style={styles.ledElement} />
+              <View style={[styles.ledElement, styles.ledElementOffset]} />
+            </View>
           </Animated.View>
 
           {/* Chrome Wheels with tire tread - Front */}
@@ -353,53 +357,58 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.2)",
   },
 
-  headlightLeftOuter: {
+  ledHeadlightLeft: {
     position: "absolute",
-    width: 58,
-    height: 26,
-    top: 72,
-    left: 16,
-    borderRadius: 13,
-    shadowColor: "#00FFFF",
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 14,
-    elevation: 10,
+    width: 56,
+    height: 24,
+    top: 73,
+    left: 17,
+    borderRadius: 12,
   },
 
-  headlightLeftContainer: {
+  ledHeadlightRight: {
+    position: "absolute",
+    width: 56,
+    height: 24,
+    top: 73,
+    right: 17,
+    borderRadius: 12,
+  },
+
+  ledHousingLeft: {
     width: "100%",
     height: "100%",
-    borderRadius: 13,
+    borderRadius: 12,
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(100, 100, 100, 0.8)",
   },
 
-  headlightRightOuter: {
-    position: "absolute",
-    width: 58,
-    height: 26,
-    top: 72,
-    right: 16,
-    borderRadius: 13,
-    shadowColor: "#00FFFF",
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 14,
-    elevation: 10,
-  },
-
-  headlightRightContainer: {
+  ledHousingRight: {
     width: "100%",
     height: "100%",
-    borderRadius: 13,
+    borderRadius: 12,
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(100, 100, 100, 0.8)",
   },
 
-  neonBorder: {
+  ledElement: {
     position: "absolute",
-    width: "100%",
-    height: "100%",
-    borderRadius: 13,
-    borderWidth: 1.2,
-    borderColor: "rgba(0, 255, 255, 0.6)",
+    width: 14,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255, 220, 100, 0.8)",
+    left: 8,
+    top: 8,
+    shadowColor: "#FFD700",
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  ledElementOffset: {
+    left: 30,
   },
 
   wheelFrontContainer: {
