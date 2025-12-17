@@ -303,15 +303,6 @@ export function CarDetailingCinematic({
                 style={StyleSheet.absoluteFill}
               />
             </Animated.View>
-
-            {/* Wash stage label */}
-            <View style={styles.stageLabel}>
-              <View style={styles.stageLabelBg}>
-                <Animated.Text style={styles.stageLabelText}>
-                  Washing
-                </Animated.Text>
-              </View>
-            </View>
           </>
         )}
 
@@ -345,15 +336,6 @@ export function CarDetailingCinematic({
                 style={StyleSheet.absoluteFill}
               />
             </Animated.View>
-
-            {/* Coating stage label */}
-            <View style={styles.stageLabel}>
-              <View style={styles.stageLabelBg}>
-                <Animated.Text style={styles.stageLabelText}>
-                  Ceramic Coating
-                </Animated.Text>
-              </View>
-            </View>
           </>
         )}
 
@@ -380,15 +362,6 @@ export function CarDetailingCinematic({
                 style={{ width: "100%", height: 60 }}
               />
             </Animated.View>
-
-            {/* Polish stage label */}
-            <View style={styles.stageLabel}>
-              <View style={styles.stageLabelBg}>
-                <Animated.Text style={styles.stageLabelText}>
-                  Polishing
-                </Animated.Text>
-              </View>
-            </View>
           </>
         )}
 
