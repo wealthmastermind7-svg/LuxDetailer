@@ -355,41 +355,41 @@ const styles = StyleSheet.create({
 
   headlightLeftOuter: {
     position: "absolute",
-    width: 50,
-    height: 28,
+    width: 58,
+    height: 26,
     top: 72,
-    left: 20,
-    borderRadius: 3,
+    left: 16,
+    borderRadius: 13,
     shadowColor: "#00FFFF",
     shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 12,
-    elevation: 8,
+    shadowRadius: 14,
+    elevation: 10,
   },
 
   headlightLeftContainer: {
     width: "100%",
     height: "100%",
-    borderRadius: 3,
+    borderRadius: 13,
     overflow: "hidden",
   },
 
   headlightRightOuter: {
     position: "absolute",
-    width: 50,
-    height: 28,
+    width: 58,
+    height: 26,
     top: 72,
-    right: 20,
-    borderRadius: 3,
+    right: 16,
+    borderRadius: 13,
     shadowColor: "#00FFFF",
     shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 12,
-    elevation: 8,
+    shadowRadius: 14,
+    elevation: 10,
   },
 
   headlightRightContainer: {
     width: "100%",
     height: "100%",
-    borderRadius: 3,
+    borderRadius: 13,
     overflow: "hidden",
   },
 
@@ -397,9 +397,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     height: "100%",
-    borderRadius: 3,
-    borderWidth: 1,
-    borderColor: "rgba(0, 255, 255, 0.5)",
+    borderRadius: 13,
+    borderWidth: 1.2,
+    borderColor: "rgba(0, 255, 255, 0.6)",
   },
 
   wheelFrontContainer: {
