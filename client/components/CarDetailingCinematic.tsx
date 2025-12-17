@@ -3,7 +3,6 @@ import { View, StyleSheet, Pressable, Dimensions } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
   withRepeat,
   interpolate,
@@ -21,9 +20,8 @@ interface CarDetailingCinematicProps {
 }
 
 /**
- * Realistic car detailing cinematic showcase
- * Features: chrome wheels, flashing headlights, exhaust glow, odometer, paint shine
- * Sharp, crisp animations - no blur, handcrafted details
+ * Realistic car detailing showcase
+ * Shows actual car with detailing effects: paint shine, headlight flash, wheel rotation, exhaust glow
  */
 export function CarDetailingCinematic({
   height = 380,
@@ -33,17 +31,13 @@ export function CarDetailingCinematic({
 
   // Continuous animations
   const paintShine = useSharedValue(0);
-  const exhaustPulse = useSharedValue(0);
   const headlightFlash = useSharedValue(0);
-  const odometerSpin = useSharedValue(0);
   const wheelRotation = useSharedValue(0);
-  const chromeShine = useSharedValue(0);
+  const exhaustGlow = useSharedValue(0);
 
-  // Interactive animations
-  const polishMotion = useSharedValue(0);
-  const detailingGlow = useSharedValue(0);
+  // Interactive
+  const polishPulse = useSharedValue(0);
 
-  // Paint shine
   useEffect(() => {
     paintShine.value = withRepeat(
       withTiming(1, { duration: 4000 }),
@@ -52,363 +46,209 @@ export function CarDetailingCinematic({
     );
   }, [paintShine]);
 
-  // Exhaust pulse
-  useEffect(() => {
-    exhaustPulse.value = withRepeat(
-      withTiming(1, { duration: 2200 }),
-      -1,
-      true
-    );
-  }, [exhaustPulse]);
-
-  // Headlight flashing
   useEffect(() => {
     headlightFlash.value = withRepeat(
-      withTiming(1, { duration: 1500 }),
+      withTiming(1, { duration: 1800 }),
       -1,
       true
     );
   }, [headlightFlash]);
 
-  // Odometer
-  useEffect(() => {
-    odometerSpin.value = withRepeat(
-      withTiming(1, { duration: 5000 }),
-      -1,
-      true
-    );
-  }, [odometerSpin]);
-
-  // Wheel rotation
   useEffect(() => {
     wheelRotation.value = withRepeat(
-      withTiming(1, { duration: 2500 }),
+      withTiming(1, { duration: 2800 }),
       -1,
       true
     );
   }, [wheelRotation]);
 
-  // Chrome shine
   useEffect(() => {
-    chromeShine.value = withRepeat(
-      withTiming(1, { duration: 3000 }),
+    exhaustGlow.value = withRepeat(
+      withTiming(1, { duration: 2200 }),
       -1,
       true
     );
-  }, [chromeShine]);
+  }, [exhaustGlow]);
 
   const handlePress = () => {
     setIsInteracting(true);
-    polishMotion.value = withTiming(1, { duration: 1200 });
-    detailingGlow.value = withTiming(1, { duration: 800 });
-
+    polishPulse.value = withTiming(1, { duration: 600 });
     setTimeout(() => {
-      polishMotion.value = withTiming(0, { duration: 600 });
-      detailingGlow.value = withTiming(0, { duration: 600 });
+      polishPulse.value = withTiming(0, { duration: 600 });
       setIsInteracting(false);
-    }, 1200);
-
+    }, 600);
     onInteract?.();
   };
 
-  // Paint shine sweep
+  // Paint shine
   const paintShineStyle = useAnimatedStyle(() => {
-    const translateX = interpolate(
-      paintShine.value,
-      [0, 1],
-      [-width, width],
-      Extrapolate.CLAMP
-    );
-    return {
-      transform: [{ translateX }],
-    };
+    const translateX = interpolate(paintShine.value, [0, 1], [-width, width], Extrapolate.CLAMP);
+    return { transform: [{ translateX }] };
   });
 
   // Headlight flash
   const headlightStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      headlightFlash.value,
-      [0, 0.4, 0.6, 1],
-      [0.3, 1, 0.3, 0.3],
-      Extrapolate.CLAMP
-    ),
-  }));
-
-  // Exhaust glow
-  const exhaustStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      exhaustPulse.value,
-      [0, 0.5, 1],
-      [0.2, 0.7, 0.2],
-      Extrapolate.CLAMP
-    ),
-  }));
-
-  // Odometer needle
-  const odometerStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        rotate: `${interpolate(
-          odometerSpin.value,
-          [0, 1],
-          [0, 360],
-          Extrapolate.CLAMP
-        )}deg`,
-      },
-    ],
+    opacity: interpolate(headlightFlash.value, [0, 0.3, 0.7, 1], [0.4, 1, 0.4, 0.4], Extrapolate.CLAMP),
   }));
 
   // Wheel rotation
   const wheelStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        rotate: `${interpolate(
-          wheelRotation.value,
-          [0, 1],
-          [0, 360],
-          Extrapolate.CLAMP
-        )}deg`,
-      },
-    ],
+    transform: [{ rotate: `${interpolate(wheelRotation.value, [0, 1], [0, 360], Extrapolate.CLAMP)}deg` }],
   }));
 
-  // Chrome reflection
-  const chromeStyle = useAnimatedStyle(() => {
-    const translateX = interpolate(
-      chromeShine.value,
-      [0, 1],
-      [-150, width + 150],
-      Extrapolate.CLAMP
-    );
-    return {
-      transform: [{ translateX }],
-      opacity: interpolate(
-        chromeShine.value,
-        [0, 0.3, 0.7, 1],
-        [0, 0.7, 0.7, 0],
-        Extrapolate.CLAMP
-      ),
-    };
-  });
+  // Exhaust glow
+  const exhaustStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(exhaustGlow.value, [0, 0.5, 1], [0.25, 0.75, 0.25], Extrapolate.CLAMP),
+  }));
 
-  // Detailing glow
-  const detailingStyle = useAnimatedStyle(() => ({
-    opacity: detailingGlow.value,
+  // Polish pulse
+  const polishStyle = useAnimatedStyle(() => ({
+    opacity: polishPulse.value,
   }));
 
   return (
     <Pressable onPress={handlePress} style={{ height }}>
-      <Animated.View
-        entering={FadeIn.duration(600)}
-        style={[styles.container, { height }]}
-      >
-        {/* Dark luxury base */}
+      <Animated.View entering={FadeIn.duration(600)} style={[styles.container, { height }]}>
+        {/* Dark garage background */}
         <LinearGradient
-          colors={["#0A0E1A", "#1a2332", "#0D1120"]}
+          colors={["#1a1a1a", "#252525", "#1a1a1a"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
 
-        {/* Car body - polished paint */}
-        <View style={[styles.carBody, StyleSheet.absoluteFill]} />
-
-        {/* Paint shine - sharp sweep */}
-        <Animated.View
-          style={[
-            styles.paintShine,
-            paintShineStyle,
-          ]}
-        >
-          <LinearGradient
-            colors={[
-              "transparent",
-              "rgba(255, 255, 255, 0.3)",
-              "transparent",
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{ width: 120, height: "100%" }}
-          />
-        </Animated.View>
-
-        {/* Chrome wheels - left */}
-        <View style={styles.wheelLeftContainer}>
-          <Animated.View
-            style={[
-              styles.wheelBase,
-              wheelStyle,
-            ]}
-          >
+        {/* Car body - red finish */}
+        <View style={styles.carContainer}>
+          {/* Car main body */}
+          <View style={styles.carBody}>
             <LinearGradient
-              colors={["#F5F5F5", "#D3D3D3", "#A9A9A9", "#D3D3D3", "#F5F5F5"]}
+              colors={["#CC1A2E", "#E8273A", "#B71428"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}
             />
-            {/* Wheel spokes */}
-            <View style={styles.wheelSpokes}>
-              <View style={styles.spoke} />
-              <View style={[styles.spoke, { transform: [{ rotate: "90deg" }] }]} />
-              <View style={[styles.spoke, { transform: [{ rotate: "45deg" }] }]} />
-              <View style={[styles.spoke, { transform: [{ rotate: "135deg" }] }]} />
-            </View>
-            <View style={styles.wheelCenter} />
-          </Animated.View>
-        </View>
 
-        {/* Chrome wheels - right */}
-        <View style={styles.wheelRightContainer}>
-          <Animated.View
-            style={[
-              styles.wheelBase,
-              wheelStyle,
-            ]}
-          >
-            <LinearGradient
-              colors={["#F5F5F5", "#D3D3D3", "#A9A9A9", "#D3D3D3", "#F5F5F5"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFill}
-            />
-            {/* Wheel spokes */}
-            <View style={styles.wheelSpokes}>
-              <View style={styles.spoke} />
-              <View style={[styles.spoke, { transform: [{ rotate: "90deg" }] }]} />
-              <View style={[styles.spoke, { transform: [{ rotate: "45deg" }] }]} />
-              <View style={[styles.spoke, { transform: [{ rotate: "135deg" }] }]} />
-            </View>
-            <View style={styles.wheelCenter} />
-          </Animated.View>
-        </View>
+            {/* Hood reflection */}
+            <View style={styles.hoodReflection} />
 
-        {/* Chrome reflection sweep */}
-        <Animated.View
-          style={[
-            styles.chromeReflection,
-            chromeStyle,
-          ]}
-        >
-          <LinearGradient
-            colors={[
-              "transparent",
-              "rgba(255, 255, 255, 0.5)",
-              "transparent",
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={{ width: 80, height: "100%" }}
-          />
-        </Animated.View>
-
-        {/* Headlights - left and right */}
-        <Animated.View
-          style={[
-            styles.headlightLeft,
-            headlightStyle,
-          ]}
-        >
-          <LinearGradient
-            colors={["#FFE066", "#FFD700", "#FFA500"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
-        </Animated.View>
-
-        <Animated.View
-          style={[
-            styles.headlightRight,
-            headlightStyle,
-          ]}
-        >
-          <LinearGradient
-            colors={["#FFE066", "#FFD700", "#FFA500"]}
-            start={{ x: 1, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
-        </Animated.View>
-
-        {/* Exhaust pipes - bottom center */}
-        <Animated.View style={[styles.exhaustContainer, exhaustStyle]}>
-          {/* Left exhaust */}
-          <LinearGradient
-            colors={["#3a3a3a", "#5a5a5a", "#4a4a4a"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.exhaustPipe}
-          />
-          {/* Right exhaust */}
-          <LinearGradient
-            colors={["#3a3a3a", "#5a5a5a", "#4a4a4a"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.exhaustPipe}
-          />
-        </Animated.View>
-
-        {/* Odometer display - center top */}
-        <View style={styles.odometerContainer}>
-          <View style={styles.odometerFace}>
-            <LinearGradient
-              colors={["#1a1a1a", "#2a2a2a"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFill}
-            />
-            <View style={styles.odometerRing} />
-
-            {/* Odometer needle */}
-            <Animated.View
-              style={[
-                styles.odometerNeedle,
-                odometerStyle,
-              ]}
-            >
+            {/* Windshield */}
+            <View style={styles.windshield}>
               <LinearGradient
-                colors={["#FFD700", "#FFA500"]}
+                colors={["rgba(100, 150, 200, 0.3)", "rgba(80, 120, 180, 0.2)"]}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+                end={{ x: 1, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
-            </Animated.View>
+            </View>
 
-            {/* Center point */}
-            <View style={styles.odometerCenter} />
+            {/* Side window */}
+            <View style={styles.sideWindow}>
+              <LinearGradient
+                colors={["rgba(100, 150, 200, 0.25)", "rgba(80, 120, 180, 0.15)"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+            </View>
+
+            {/* Door line */}
+            <View style={styles.doorLine} />
           </View>
-        </View>
 
-        {/* Interactive detailing pad */}
-        <Pressable
-          style={styles.detailingPadContainer}
-          onPress={handlePress}
-        >
-          <View style={styles.detailingPad}>
+          {/* Headlights - left */}
+          <Animated.View style={[styles.headlightLeftContainer, headlightStyle]}>
             <LinearGradient
-              colors={["#1E90FF", "#1B7ACC"]}
+              colors={["#FFF8DC", "#FFD700", "#FFA500"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}
             />
-            <View style={styles.padBorder} />
-          </View>
-        </Pressable>
+          </Animated.View>
 
-        {/* Detailing intensity glow */}
-        {isInteracting && (
-          <Animated.View
-            style={[
-              styles.detailingGlowOverlay,
-              detailingStyle,
-              StyleSheet.absoluteFill,
-            ]}
-          >
+          {/* Headlights - right */}
+          <Animated.View style={[styles.headlightRightContainer, headlightStyle]}>
             <LinearGradient
-              colors={[
-                "rgba(212, 175, 55, 0.2)",
-                "rgba(255, 220, 100, 0.1)",
-              ]}
+              colors={["#FFF8DC", "#FFD700", "#FFA500"]}
+              start={{ x: 1, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+          </Animated.View>
+
+          {/* Chrome wheels - front */}
+          <View style={styles.wheelFrontContainer}>
+            <Animated.View style={[styles.wheel, wheelStyle]}>
+              <LinearGradient
+                colors={["#F0F0F0", "#D0D0D0", "#A0A0A0", "#D0D0D0", "#F0F0F0"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+              {/* Wheel spokes */}
+              <View style={styles.wheelSpokes}>
+                <View style={styles.spoke} />
+                <View style={[styles.spoke, { transform: [{ rotate: "72deg" }] }]} />
+                <View style={[styles.spoke, { transform: [{ rotate: "144deg" }] }]} />
+                <View style={[styles.spoke, { transform: [{ rotate: "216deg" }] }]} />
+                <View style={[styles.spoke, { transform: [{ rotate: "288deg" }] }]} />
+              </View>
+              <View style={styles.wheelCenter} />
+            </Animated.View>
+          </View>
+
+          {/* Chrome wheels - rear */}
+          <View style={styles.wheelRearContainer}>
+            <Animated.View style={[styles.wheel, wheelStyle]}>
+              <LinearGradient
+                colors={["#F0F0F0", "#D0D0D0", "#A0A0A0", "#D0D0D0", "#F0F0F0"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+              {/* Wheel spokes */}
+              <View style={styles.wheelSpokes}>
+                <View style={styles.spoke} />
+                <View style={[styles.spoke, { transform: [{ rotate: "72deg" }] }]} />
+                <View style={[styles.spoke, { transform: [{ rotate: "144deg" }] }]} />
+                <View style={[styles.spoke, { transform: [{ rotate: "216deg" }] }]} />
+                <View style={[styles.spoke, { transform: [{ rotate: "288deg" }] }]} />
+              </View>
+              <View style={styles.wheelCenter} />
+            </Animated.View>
+          </View>
+
+          {/* Exhaust pipes */}
+          <Animated.View style={[styles.exhaustContainer, exhaustStyle]}>
+            <LinearGradient
+              colors={["#2a2a2a", "#5a5a5a", "#3a3a3a"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.exhaustPipe}
+            />
+            <LinearGradient
+              colors={["#2a2a2a", "#5a5a5a", "#3a3a3a"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.exhaustPipe}
+            />
+          </Animated.View>
+        </View>
+
+        {/* Paint shine sweep - over top */}
+        <Animated.View style={[styles.paintShine, paintShineStyle]}>
+          <LinearGradient
+            colors={["transparent", "rgba(255, 255, 255, 0.35)", "transparent"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{ width: 100, height: "100%" }}
+          />
+        </Animated.View>
+
+        {/* Polish glow effect */}
+        {isInteracting && (
+          <Animated.View style={[styles.polishGlow, polishStyle, StyleSheet.absoluteFill]}>
+            <LinearGradient
+              colors={["rgba(255, 215, 0, 0.15)", "rgba(212, 175, 55, 0.08)"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}
@@ -416,21 +256,18 @@ export function CarDetailingCinematic({
           </Animated.View>
         )}
 
-        {/* Top shimmer for depth */}
+        {/* Top light */}
         <LinearGradient
-          colors={[
-            "rgba(255, 255, 255, 0.08)",
-            "transparent",
-          ]}
+          colors={["rgba(255, 255, 255, 0.1)", "transparent"]}
           start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0.3 }}
-          style={[styles.shimmerTop, StyleSheet.absoluteFill]}
+          end={{ x: 0, y: 0.4 }}
+          style={[styles.topLight, StyleSheet.absoluteFill]}
           pointerEvents="none"
         />
 
         {/* Tap indicator */}
         {!isInteracting && (
-          <View style={styles.tapIndicator}>
+          <View style={styles.tapHint}>
             <View style={styles.tapDot} />
           </View>
         )}
@@ -449,45 +286,112 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: Spacing.xl,
   },
-  carBody: {
-    backgroundColor: "rgba(20, 35, 55, 0.9)",
-  },
-  paintShine: {
-    position: "absolute",
-    width: 120,
-    height: "100%",
-    pointerEvents: "none",
-  },
 
-  // Wheels
-  wheelLeftContainer: {
-    position: "absolute",
-    width: 75,
-    height: 75,
-    bottom: 25,
-    left: 35,
-    borderRadius: 37.5,
-    overflow: "hidden",
-  },
-  wheelRightContainer: {
-    position: "absolute",
-    width: 75,
-    height: 75,
-    bottom: 25,
-    right: 35,
-    borderRadius: 37.5,
-    overflow: "hidden",
-  },
-  wheelBase: {
+  carContainer: {
     width: "100%",
     height: "100%",
-    borderRadius: 37.5,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
+
+  carBody: {
+    width: 220,
+    height: 100,
+    borderRadius: 12,
+    overflow: "hidden",
+    position: "relative",
+  },
+
+  hoodReflection: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: "35%",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+  },
+
+  windshield: {
+    position: "absolute",
+    top: 18,
+    left: 35,
+    width: 65,
+    height: 30,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+
+  sideWindow: {
+    position: "absolute",
+    top: 28,
+    left: 110,
+    width: 45,
+    height: 25,
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+
+  doorLine: {
+    position: "absolute",
+    left: 105,
+    top: 20,
+    width: 1,
+    height: 50,
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+  },
+
+  headlightLeftContainer: {
+    position: "absolute",
+    width: 40,
+    height: 22,
+    top: 75,
+    left: 25,
+    borderRadius: 2,
+    overflow: "hidden",
+  },
+
+  headlightRightContainer: {
+    position: "absolute",
+    width: 40,
+    height: 22,
+    top: 75,
+    right: 25,
+    borderRadius: 2,
+    overflow: "hidden",
+  },
+
+  wheelFrontContainer: {
+    position: "absolute",
+    width: 65,
+    height: 65,
+    bottom: 5,
+    left: 40,
+    borderRadius: 32.5,
+    overflow: "hidden",
+  },
+
+  wheelRearContainer: {
+    position: "absolute",
+    width: 65,
+    height: 65,
+    bottom: 5,
+    right: 40,
+    borderRadius: 32.5,
+    overflow: "hidden",
+  },
+
+  wheel: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 32.5,
     overflow: "hidden",
     borderWidth: 1.5,
-    borderColor: "rgba(160, 160, 160, 0.8)",
+    borderColor: "rgba(140, 140, 140, 0.7)",
     justifyContent: "center",
     alignItems: "center",
   },
+
   wheelSpokes: {
     position: "absolute",
     width: "100%",
@@ -495,163 +399,70 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   spoke: {
     position: "absolute",
-    width: 2,
-    height: "50%",
-    backgroundColor: "rgba(100, 100, 100, 0.6)",
+    width: 1.5,
+    height: "45%",
+    backgroundColor: "rgba(80, 80, 80, 0.7)",
   },
+
   wheelCenter: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#3a3a3a",
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#1a1a1a",
     borderWidth: 1,
     borderColor: "rgba(200, 200, 200, 0.8)",
-    zIndex: 10,
+    zIndex: 5,
   },
 
-  // Chrome reflection
-  chromeReflection: {
-    position: "absolute",
-    width: 80,
-    height: "100%",
-    pointerEvents: "none",
-  },
-
-  // Headlights
-  headlightLeft: {
-    position: "absolute",
-    width: 45,
-    height: 28,
-    top: 45,
-    left: 25,
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  headlightRight: {
-    position: "absolute",
-    width: 45,
-    height: 28,
-    top: 45,
-    right: 25,
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-
-  // Exhaust
   exhaustContainer: {
     position: "absolute",
-    width: 70,
-    height: 35,
-    bottom: 28,
+    width: 60,
+    height: 32,
+    bottom: 18,
     alignSelf: "center",
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     alignItems: "flex-end",
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
   },
+
   exhaustPipe: {
-    width: 18,
-    height: 28,
-    borderRadius: 9,
+    width: 14,
+    height: 24,
+    borderRadius: 7,
     borderWidth: 1,
-    borderColor: "rgba(80, 80, 80, 0.8)",
+    borderColor: "rgba(100, 100, 100, 0.7)",
   },
 
-  // Odometer
-  odometerContainer: {
+  paintShine: {
     position: "absolute",
-    width: 85,
-    height: 85,
-    top: 35,
-    alignSelf: "center",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 15,
-  },
-  odometerFace: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    overflow: "hidden",
-    borderWidth: 2,
-    borderColor: "rgba(212, 175, 55, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  odometerRing: {
-    position: "absolute",
-    width: "100%",
+    width: 100,
     height: "100%",
-    borderRadius: 35,
-    borderWidth: 0.5,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-  },
-  odometerNeedle: {
-    position: "absolute",
-    width: 2.5,
-    height: 26,
-    borderRadius: 1.25,
-  },
-  odometerCenter: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "rgba(212, 175, 55, 1)",
-    position: "absolute",
-    zIndex: 2,
-    borderWidth: 1,
-    borderColor: "rgba(255, 220, 100, 0.8)",
-  },
-
-  // Detailing pad
-  detailingPadContainer: {
-    position: "absolute",
-    width: 75,
-    height: 75,
-    bottom: 50,
-    alignSelf: "center",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 15,
-  },
-  detailingPad: {
-    width: 65,
-    height: 65,
-    borderRadius: 32.5,
-    overflow: "hidden",
-    borderWidth: 1.5,
-    borderColor: "rgba(30, 144, 255, 0.6)",
-  },
-  padBorder: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    borderRadius: 32.5,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-  },
-
-  // Effects
-  detailingGlowOverlay: {
-    pointerEvents: "none",
-  },
-  shimmerTop: {
     pointerEvents: "none",
   },
 
-  // Indicator
-  tapIndicator: {
+  polishGlow: {
+    pointerEvents: "none",
+  },
+
+  topLight: {
+    pointerEvents: "none",
+  },
+
+  tapHint: {
     position: "absolute",
-    bottom: 15,
+    bottom: 12,
     alignSelf: "center",
     zIndex: 5,
   },
+
   tapDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
     backgroundColor: "rgba(30, 144, 255, 0.7)",
   },
 });
