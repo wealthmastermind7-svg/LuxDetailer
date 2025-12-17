@@ -209,15 +209,26 @@ See `design_guidelines.md` for comprehensive design specifications including:
 
 ## Recent Changes
 
-### December 17, 2025 - Cinematic Hero Experience & Responsive Typography
-- **Complete**: Replaced looping videos with handcrafted cinematic experience
-  - Created CinematicHero component with parallax scrolling effects
-  - Implemented smooth spring animations and interactive moments
-  - Organic gradient backgrounds with layered parallax depth
-  - Interactive center element with glow effects and spring responses
-  - Animated particles trigger on user interaction for tactile feedback
-  - Replaced HomeVideoHero, FeaturedVideoReel, and ServiceVideoHero with cinematic versions
-  - Feels premium and handcrafted vs. generic video playback
+### December 17, 2025 - Realistic Car Detailing Cinematic Experience
+- **Complete**: Replaced looping videos with realistic detailing process cinematic
+  - Created CarDetailingCinematic component with 3-stage cycling animation
+  - Stage 1 - Washing: Water droplets falling with foam/soap effects
+  - Stage 2 - Coating: Ceramic coating application flow with gloss shine effects
+  - Stage 3 - Polishing: Rotating buffer pad with polish highlights
+  - Auto-cycles through stages every 5 seconds or tap to advance
+  - Realistic luxury car silhouette with glowing effects
+  - Continuous reflection shimmer for premium feel
+  - Interactive: Tap to manually advance through detailing stages
+  - Replaced HomeVideoHero, FeaturedVideoReel, and ServiceVideoHero with realistic cinematic
+  
+- **Complete**: Floating mascot guidance system across all screens
+  - Created MascotContext for global mascot message management
+  - Mascot displays context-aware guidance on each page
+  - Home: "Welcome! Browse services or book your first detail."
+  - Services: "Explore our premium detailing services!"
+  - Bookings: "View and manage your bookings here. Tap to see details."
+  - Profile: "Manage your account, vehicles, and preferences."
+  - Always visible and helpful throughout user journey
 
 - **Complete**: Responsive font sizing system (zero text wrapping)
   - Created useResponsiveFontSize hook for dynamic font scaling

@@ -6,10 +6,12 @@ import Animated, {
   withSpring,
   withTiming,
   withRepeat,
+  withSequence,
   interpolate,
   Extrapolate,
   FadeIn,
   FadeOut,
+  Easing,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { BorderRadius, Spacing } from "@/constants/theme";
@@ -21,159 +23,223 @@ interface CarDetailingCinematicProps {
   onInteract?: () => void;
 }
 
+type ProcessStage = "wash" | "coat" | "polish";
+
 /**
- * Car detailing-specific cinematic experience
- * Showcases: paint shine, protective coatings, light reflections, polishing effects
- * Interactive: tap to trigger application animation
+ * Realistic car detailing cinematic showing three stages:
+ * 1. Washing - water spray and foam effects
+ * 2. Coating - protective ceramic coating application
+ * 3. Polishing - buffing and shine effects
  */
 export function CarDetailingCinematic({
   height = 380,
   onInteract,
 }: CarDetailingCinematicProps) {
-  const [isInteracting, setIsInteracting] = useState(false);
+  const [stage, setStage] = useState<ProcessStage>("wash");
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  // Continuous animations
-  const shinePulse = useSharedValue(0);
-  const reflectionX = useSharedValue(0);
-  const coatingOpacity = useSharedValue(0.3);
+  // Wash stage animations
+  const waterDrops = useSharedValue(0);
+  const foamLayer = useSharedValue(0);
 
-  // Interactive animations
+  // Coat stage animations
+  const coatingFlow = useSharedValue(0);
+  const glossShine = useSharedValue(0);
+
+  // Polish stage animations
   const polishMotion = useSharedValue(0);
-  const waterBeadScale = useSharedValue(0);
-  const protectionGlow = useSharedValue(0.2);
+  const bufferRotation = useSharedValue(0);
 
-  // Continuous shine effect
+  // Shared animations
+  const carGlow = useSharedValue(0);
+  const reflectionShimmer = useSharedValue(0);
+
+  // Auto-cycle through stages
   useEffect(() => {
-    shinePulse.value = withRepeat(
-      withTiming(1, { duration: 3000 }),
+    const stageTimer = setInterval(() => {
+      setStage((prev) => {
+        if (prev === "wash") return "coat";
+        if (prev === "coat") return "polish";
+        return "wash";
+      });
+    }, 5000);
+    return () => clearInterval(stageTimer);
+  }, []);
+
+  // Wash stage effects
+  useEffect(() => {
+    if (stage === "wash") {
+      waterDrops.value = withRepeat(
+        withSequence(
+          withTiming(0, { duration: 500 }),
+          withTiming(1, { duration: 1500 }),
+          withTiming(0, { duration: 500 })
+        ),
+        -1,
+        false
+      );
+
+      foamLayer.value = withRepeat(
+        withSequence(
+          withTiming(0, { duration: 300 }),
+          withTiming(0.7, { duration: 1500 }),
+          withTiming(0, { duration: 700 })
+        ),
+        -1,
+        false
+      );
+    }
+  }, [stage]);
+
+  // Coat stage effects
+  useEffect(() => {
+    if (stage === "coat") {
+      coatingFlow.value = withRepeat(
+        withSequence(
+          withTiming(0, { duration: 600 }),
+          withTiming(1, { duration: 2000 }),
+          withTiming(0, { duration: 600 })
+        ),
+        -1,
+        false
+      );
+
+      glossShine.value = withRepeat(
+        withSequence(
+          withTiming(0.3, { duration: 800 }),
+          withTiming(0.9, { duration: 1500 }),
+          withTiming(0.3, { duration: 800 })
+        ),
+        -1,
+        false
+      );
+    }
+  }, [stage]);
+
+  // Polish stage effects
+  useEffect(() => {
+    if (stage === "polish") {
+      polishMotion.value = withRepeat(
+        withSequence(
+          withTiming(0, { duration: 400 }),
+          withTiming(1, { duration: 1200 }),
+          withTiming(0.5, { duration: 400 }),
+          withTiming(0, { duration: 400 })
+        ),
+        -1,
+        false
+      );
+
+      bufferRotation.value = withRepeat(
+        withTiming(360, { duration: 3000, easing: Easing.linear }),
+        -1,
+        false
+      );
+    }
+  }, [stage]);
+
+  // Continuous car glow
+  useEffect(() => {
+    carGlow.value = withRepeat(
+      withSequence(
+        withTiming(0.4, { duration: 2000 }),
+        withTiming(0.8, { duration: 2000 })
+      ),
       -1,
-      true
+      false
     );
-  }, [shinePulse]);
 
-  // Continuous reflection
-  useEffect(() => {
-    reflectionX.value = withRepeat(
+    reflectionShimmer.value = withRepeat(
       withTiming(1, { duration: 4000 }),
       -1,
       true
     );
-  }, [reflectionX]);
-
-  // Continuous coating glow
-  useEffect(() => {
-    coatingOpacity.value = withRepeat(
-      withTiming(0.6, { duration: 2500 }),
-      -1,
-      true
-    );
-  }, [coatingOpacity]);
+  }, []);
 
   const handlePress = () => {
-    setIsInteracting(true);
-
-    // Polish motion - simulate buffing
-    polishMotion.value = withTiming(1, { duration: 1200 });
-
-    // Water bead effect - like hydrophobic coating
-    waterBeadScale.value = withSpring(1.2, {
-      damping: 6,
-      stiffness: 100,
+    setIsAnimating(true);
+    setStage((prev) => {
+      if (prev === "wash") return "coat";
+      if (prev === "coat") return "polish";
+      return "wash";
     });
-
-    // Protection glow intensifies
-    protectionGlow.value = withTiming(0.9, { duration: 800 });
-
-    setTimeout(() => {
-      polishMotion.value = withTiming(0, { duration: 600 });
-      waterBeadScale.value = withTiming(0, { duration: 500 });
-      protectionGlow.value = withTiming(0.2, { duration: 600 });
-      setIsInteracting(false);
-    }, 1200);
-
+    setTimeout(() => setIsAnimating(false), 500);
     onInteract?.();
   };
 
-  // Shine wave effect (like light on paint)
-  const shineWaveStyle = useAnimatedStyle(() => {
-    const translateX = interpolate(
-      shinePulse.value,
-      [0, 1],
-      [-width, width],
-      Extrapolate.CLAMP
-    );
-    return {
-      transform: [{ translateX }],
-    };
-  });
-
-  // Light reflection across car surface
-  const reflectionStyle = useAnimatedStyle(() => {
-    const translateX = interpolate(
-      reflectionX.value,
-      [0, 1],
-      [-300, width + 300],
-      Extrapolate.CLAMP
-    );
-    return {
-      transform: [{ translateX }],
-      opacity: interpolate(
-        reflectionX.value,
-        [0, 0.3, 0.7, 1],
-        [0, 0.6, 0.6, 0],
-        Extrapolate.CLAMP
-      ),
-    };
-  });
-
-  // Protective coating layer animation
-  const coatingStyle = useAnimatedStyle(() => ({
-    opacity: coatingOpacity.value,
-  }));
-
-  // Polishing motion (side-to-side buffing)
-  const polishStyle = useAnimatedStyle(() => {
-    const translateX = interpolate(
-      polishMotion.value,
-      [0, 0.5, 1],
-      [-40, 40, -40],
-      Extrapolate.CLAMP
-    );
-    return {
-      transform: [{ translateX }],
-      opacity: interpolate(
-        polishMotion.value,
-        [0, 1],
-        [0, 1],
-        Extrapolate.CLAMP
-      ),
-    };
-  });
-
-  // Water bead effect (hydrophobic coating)
-  const waterBeadStyle = useAnimatedStyle(() => ({
+  // Water droplet animation
+  const waterDropStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(waterDrops.value, [0, 0.5, 1], [0, 1, 0]),
     transform: [
-      { scale: waterBeadScale.value },
       {
         translateY: interpolate(
-          waterBeadScale.value,
-          [0, 1.2],
-          [0, -50],
+          waterDrops.value,
+          [0, 1],
+          [-20, 80],
           Extrapolate.CLAMP
         ),
       },
     ],
-    opacity: interpolate(
-      waterBeadScale.value,
-      [0, 0.5, 1.2],
-      [0, 1, 0],
-      Extrapolate.CLAMP
-    ),
   }));
 
-  // Protection glow
-  const protectionGlowStyle = useAnimatedStyle(() => ({
-    opacity: protectionGlow.value,
+  // Foam layer animation
+  const foamStyle = useAnimatedStyle(() => ({
+    opacity: foamLayer.value,
+  }));
+
+  // Coating flow animation
+  const coatingStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(coatingFlow.value, [0, 0.5, 1], [0, 0.8, 0]),
+    transform: [
+      {
+        translateX: interpolate(
+          coatingFlow.value,
+          [0, 1],
+          [-width / 2, width / 2],
+          Extrapolate.CLAMP
+        ),
+      },
+    ],
+  }));
+
+  // Gloss shine animation
+  const glossStyle = useAnimatedStyle(() => ({
+    opacity: glossShine.value,
+  }));
+
+  // Polish motion animation
+  const polishStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(polishMotion.value, [0, 0.5, 1], [0, 1, 0.5]),
+    transform: [
+      {
+        translateX: interpolate(
+          polishMotion.value,
+          [0, 0.5, 1],
+          [-40, 40, -40],
+          Extrapolate.CLAMP
+        ),
+      },
+    ],
+  }));
+
+  // Buffer rotation
+  const bufferStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${bufferRotation.value}deg` }],
+  }));
+
+  // Car glow effect
+  const carGlowStyle = useAnimatedStyle(() => ({
+    opacity: carGlow.value,
+  }));
+
+  // Reflection shimmer
+  const reflectionStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      reflectionShimmer.value,
+      [0, 0.5, 1],
+      [0.1, 0.4, 0.1],
+      Extrapolate.CLAMP
+    ),
   }));
 
   return (
@@ -182,59 +248,155 @@ export function CarDetailingCinematic({
         entering={FadeIn.duration(600)}
         style={[styles.container, { height }]}
       >
-        {/* Dark luxury gradient base - polished car appearance */}
+        {/* Dark luxury gradient - polished car paint */}
         <LinearGradient
-          colors={["#0A0E1A", "#1a2332", "#0D1120"]}
+          colors={["#050814", "#0F1419", "#050814"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
 
-        {/* Paint surface base layer */}
+        {/* Paint base layer with depth */}
         <View style={[styles.paintSurface, StyleSheet.absoluteFill]} />
 
-        {/* Protective coating visualization */}
-        <Animated.View
-          style={[
-            styles.coatingLayer,
-            coatingStyle,
-            StyleSheet.absoluteFill,
-          ]}
-        >
-          <LinearGradient
-            colors={[
-              "rgba(30, 144, 255, 0.15)",
-              "rgba(212, 175, 55, 0.08)",
-              "rgba(30, 144, 255, 0.1)",
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
-        </Animated.View>
+        {/* Car silhouette representation */}
+        <View style={[styles.carBody, StyleSheet.absoluteFill]}>
+          <View style={styles.carShape} />
+        </View>
 
-        {/* Light reflection - sunlight on polished paint */}
-        <Animated.View
-          style={[
-            styles.lightReflection,
-            reflectionStyle,
-            StyleSheet.absoluteFill,
-          ]}
-        >
-          <LinearGradient
-            colors={[
-              "transparent",
-              "rgba(255, 255, 255, 0.3)",
-              "transparent",
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
-        </Animated.View>
+        {/* WASH STAGE */}
+        {stage === "wash" && (
+          <>
+            {/* Water droplets falling */}
+            <Animated.View style={[styles.waterDropletLeft, waterDropStyle]}>
+              <View style={styles.waterDrop} />
+            </Animated.View>
+            <Animated.View
+              style={[
+                styles.waterDropletCenter,
+                waterDropStyle,
+                { animationDelay: "0.2s" },
+              ]}
+            >
+              <View style={styles.waterDrop} />
+            </Animated.View>
+            <Animated.View
+              style={[
+                styles.waterDropletRight,
+                waterDropStyle,
+                { animationDelay: "0.4s" },
+              ]}
+            >
+              <View style={styles.waterDrop} />
+            </Animated.View>
 
-        {/* Shine wave - polish motion effect */}
-        <Animated.View style={[styles.shineWave, shineWaveStyle]}>
+            {/* Foam/soap effect */}
+            <Animated.View style={[styles.foamLayer, foamStyle]}>
+              <LinearGradient
+                colors={[
+                  "rgba(200, 220, 240, 0.4)",
+                  "rgba(150, 180, 220, 0.2)",
+                  "rgba(200, 220, 240, 0.3)",
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+            </Animated.View>
+
+            {/* Wash stage label */}
+            <View style={styles.stageLabel}>
+              <View style={styles.stageLabelBg}>
+                <Animated.Text style={styles.stageLabelText}>
+                  Washing
+                </Animated.Text>
+              </View>
+            </View>
+          </>
+        )}
+
+        {/* COAT STAGE */}
+        {stage === "coat" && (
+          <>
+            {/* Ceramic coating application flow */}
+            <Animated.View style={[styles.coatingFlow, coatingStyle]}>
+              <LinearGradient
+                colors={[
+                  "transparent",
+                  "rgba(212, 175, 55, 0.4)",
+                  "transparent",
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{ width: 150, height: "100%" }}
+              />
+            </Animated.View>
+
+            {/* Gloss shine from coating */}
+            <Animated.View style={[styles.glossLayer, glossStyle]}>
+              <LinearGradient
+                colors={[
+                  "rgba(30, 144, 255, 0.2)",
+                  "rgba(255, 255, 255, 0.25)",
+                  "rgba(30, 144, 255, 0.15)",
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+            </Animated.View>
+
+            {/* Coating stage label */}
+            <View style={styles.stageLabel}>
+              <View style={styles.stageLabelBg}>
+                <Animated.Text style={styles.stageLabelText}>
+                  Ceramic Coating
+                </Animated.Text>
+              </View>
+            </View>
+          </>
+        )}
+
+        {/* POLISH STAGE */}
+        {stage === "polish" && (
+          <>
+            {/* Polishing pad motion */}
+            <Animated.View style={[styles.polishPad, polishStyle]}>
+              <Animated.View style={bufferStyle}>
+                <View style={styles.bufferPad} />
+              </Animated.View>
+            </Animated.View>
+
+            {/* Polish highlight effect */}
+            <Animated.View style={[styles.polishHighlight, polishStyle]}>
+              <LinearGradient
+                colors={[
+                  "transparent",
+                  "rgba(212, 175, 55, 0.5)",
+                  "transparent",
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={{ width: "100%", height: 60 }}
+              />
+            </Animated.View>
+
+            {/* Polish stage label */}
+            <View style={styles.stageLabel}>
+              <View style={styles.stageLabelBg}>
+                <Animated.Text style={styles.stageLabelText}>
+                  Polishing
+                </Animated.Text>
+              </View>
+            </View>
+          </>
+        )}
+
+        {/* Car glow - always present */}
+        <Animated.View style={[styles.carGlow, carGlowStyle]} />
+
+        {/* Reflection shimmer - always present */}
+        <Animated.View style={[styles.reflectionShimmer, reflectionStyle]}>
           <LinearGradient
             colors={[
               "transparent",
@@ -243,85 +405,15 @@ export function CarDetailingCinematic({
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
-            style={{ width: 200, height: "100%" }}
+            style={{ width: "100%", height: "100%" }}
           />
         </Animated.View>
 
-        {/* Polishing motion indicator */}
-        {isInteracting && (
-          <Animated.View
-            style={[styles.polishIndicator, polishStyle]}
-          >
-            <LinearGradient
-              colors={[
-                "rgba(212, 175, 55, 0)",
-                "rgba(212, 175, 55, 0.4)",
-                "rgba(212, 175, 55, 0)",
-              ]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{
-                width: 80,
-                height: 6,
-                borderRadius: 3,
-              }}
-            />
-          </Animated.View>
-        )}
-
-        {/* Interactive detail button - represents detailing pad */}
-        <Pressable
-          style={styles.detailingPadContainer}
-          onPress={handlePress}
-        >
-          <Animated.View style={[styles.detailingPad]}>
-            <LinearGradient
-              colors={["#1E90FF", "#1B7ACC"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFill}
-            />
-            <View
-              style={[
-                styles.detailingPadTexture,
-                StyleSheet.absoluteFill,
-              ]}
-            />
-          </Animated.View>
-
-          {/* Detailing pad glow effect */}
-          <Animated.View
-            style={[
-              styles.padGlow,
-              protectionGlowStyle,
-            ]}
-          />
-        </Pressable>
-
-        {/* Water beads - hydrophobic coating effect */}
-        <Animated.View
-          style={[styles.waterBeadContainer, waterBeadStyle]}
-        >
-          <View style={styles.waterBead} />
-          <View
-            style={[
-              styles.waterBead,
-              { marginLeft: 12, opacity: 0.7 },
-            ]}
-          />
-          <View
-            style={[
-              styles.waterBead,
-              { marginLeft: 12, opacity: 0.5 },
-            ]}
-          />
-        </Animated.View>
-
-        {/* Shimmer overlay for depth and luxury feel */}
+        {/* Luxury shimmer overlay */}
         <LinearGradient
           colors={[
             "transparent",
-            "rgba(255, 255, 255, 0.04)",
+            "rgba(255, 255, 255, 0.05)",
             "transparent",
           ]}
           start={{ x: 0, y: 0 }}
@@ -330,18 +422,13 @@ export function CarDetailingCinematic({
           pointerEvents="none"
         />
 
-        {/* Interactive hint */}
-        {!isInteracting && (
-          <Animated.View style={styles.hint}>
-            <View style={styles.hintRing} />
-            <View
-              style={[
-                styles.hintRing,
-                styles.hintRingOuter,
-              ]}
-            />
-          </Animated.View>
-        )}
+        {/* Interactive tap indicator */}
+        <View style={styles.tapIndicator}>
+          <View style={styles.tapDot} />
+          <Animated.Text style={styles.tapText}>
+            Tap to advance
+          </Animated.Text>
+        </View>
       </Animated.View>
     </Pressable>
   );
@@ -358,95 +445,155 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   paintSurface: {
-    backgroundColor: "rgba(13, 27, 42, 0.8)",
+    backgroundColor: "rgba(10, 14, 26, 0.8)",
   },
-  coatingLayer: {
-    pointerEvents: "none",
+  carBody: {
+    justifyContent: "center",
+    alignItems: "center",
   },
-  lightReflection: {
+  carShape: {
+    width: 220,
+    height: 110,
+    borderRadius: 20,
+    backgroundColor: "rgba(30, 30, 40, 0.6)",
+    borderWidth: 2,
+    borderColor: "rgba(100, 100, 120, 0.4)",
+    shadowColor: "rgba(0, 0, 0, 0.8)",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  waterDropletLeft: {
+    position: "absolute",
+    top: "20%",
+    left: "25%",
+    zIndex: 5,
+  },
+  waterDropletCenter: {
+    position: "absolute",
+    top: "25%",
+    left: "50%",
+    zIndex: 5,
+  },
+  waterDropletRight: {
+    position: "absolute",
+    top: "20%",
+    right: "25%",
+    zIndex: 5,
+  },
+  waterDrop: {
+    width: 12,
+    height: 16,
+    borderRadius: 6,
+    backgroundColor: "rgba(100, 180, 255, 0.6)",
+    shadowColor: "#64B4FF",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+  },
+  foamLayer: {
+    position: "absolute",
+    width: "100%",
+    height: "50%",
+    top: "30%",
+  },
+  coatingFlow: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 4,
+  },
+  glossLayer: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    zIndex: 3,
+  },
+  polishPad: {
+    position: "absolute",
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: "center",
+    alignItems: "center",
+    top: "35%",
+    left: "50%",
+    marginLeft: -35,
+    zIndex: 6,
+  },
+  bufferPad: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(212, 175, 55, 0.3)",
+    borderWidth: 2,
+    borderColor: "rgba(212, 175, 55, 0.6)",
+  },
+  polishHighlight: {
+    position: "absolute",
+    width: "100%",
+    height: 80,
+    top: "45%",
+    zIndex: 5,
+  },
+  carGlow: {
+    position: "absolute",
+    width: 280,
+    height: 160,
+    borderRadius: 40,
+    top: "50%",
+    left: "50%",
+    marginLeft: -140,
+    marginTop: -80,
+    backgroundColor: "rgba(30, 144, 255, 0.1)",
+    zIndex: 1,
+  },
+  reflectionShimmer: {
+    position: "absolute",
     width: "100%",
     height: "60%",
-    pointerEvents: "none",
+    top: "20%",
+    zIndex: 2,
   },
-  shineWave: {
+  stageLabel: {
     position: "absolute",
-    width: 200,
-    height: "100%",
-    pointerEvents: "none",
-  },
-  polishIndicator: {
-    position: "absolute",
-    top: "35%",
-    alignSelf: "center",
+    top: Spacing.lg,
+    left: Spacing.lg,
     zIndex: 20,
   },
-  detailingPadContainer: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    justifyContent: "center",
+  stageLabelBg: {
+    backgroundColor: "rgba(30, 144, 255, 0.2)",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: "rgba(30, 144, 255, 0.4)",
+  },
+  stageLabelText: {
+    color: "#1E90FF",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  tapIndicator: {
+    position: "absolute",
+    bottom: Spacing.lg,
+    alignSelf: "center",
     alignItems: "center",
     zIndex: 15,
   },
-  detailingPad: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    overflow: "hidden",
-    borderWidth: 2,
-    borderColor: "rgba(30, 144, 255, 0.5)",
+  tapDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(30, 144, 255, 0.6)",
+    marginBottom: Spacing.xs,
   },
-  detailingPadTexture: {
-    backgroundColor: "rgba(212, 175, 55, 0.1)",
-  },
-  padGlow: {
-    position: "absolute",
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "#1E90FF",
-    top: -20,
-    left: -20,
-    zIndex: -1,
-  },
-  waterBeadContainer: {
-    position: "absolute",
-    bottom: 40,
-    alignSelf: "center",
-    flexDirection: "row",
-    zIndex: 12,
-  },
-  waterBead: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "rgba(30, 144, 255, 0.8)",
-    shadowColor: "#1E90FF",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  hint: {
-    position: "absolute",
-    bottom: 20,
-    alignSelf: "center",
-    zIndex: 5,
-  },
-  hintRing: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: "rgba(30, 144, 255, 0.6)",
-  },
-  hintRingOuter: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    position: "absolute",
-    top: -3,
-    left: -3,
-    borderColor: "rgba(30, 144, 255, 0.3)",
+  tapText: {
+    fontSize: 11,
+    color: "rgba(30, 144, 255, 0.5)",
+    fontWeight: "500",
   },
 });
