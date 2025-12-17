@@ -11,8 +11,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
-import { FloatingMascot } from "@/components/FloatingMascot";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { useMascot } from "@/contexts/MascotContext";
 import { BookingsStackParamList } from "@/navigation/BookingsStackNavigator";
 import { apiRequest } from "@/lib/query-client";
 
@@ -93,6 +93,11 @@ export default function BookingsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<NavigationProp>();
   const queryClient = useQueryClient();
+  const { setMascotMessage } = useMascot();
+
+  React.useEffect(() => {
+    setMascotMessage("View and manage your bookings here. Tap to see details.");
+  }, [setMascotMessage]);
 
   const { data: bookings = [], isLoading: bookingsLoading } = useQuery<ApiBooking[]>({
     queryKey: ["/api/bookings"],
@@ -331,11 +336,6 @@ export default function BookingsScreen() {
           </View>
         )}
       </ScrollView>
-
-      <FloatingMascot 
-        message={`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} bookings`}
-        bottomOffset={tabBarHeight + Spacing.lg}
-      />
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { ScrollView, View, StyleSheet, Image, Pressable, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -11,11 +11,11 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
-import { FloatingMascot } from "@/components/FloatingMascot";
 import { HeaderTitle } from "@/components/HeaderTitle";
 import { HomeVideoHero } from "@/components/HomeVideoHero";
 import { Colors, Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
+import { useMascot } from "@/contexts/MascotContext";
 
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
 
@@ -59,7 +59,11 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<NavigationProp>();
-  const [mascotMessage, setMascotMessage] = useState("Welcome! Tap to book your first detail.");
+  const { setMascotMessage } = useMascot();
+
+  React.useEffect(() => {
+    setMascotMessage("Welcome! Browse services or book your first detail.");
+  }, [setMascotMessage]);
   
   const { data: services = [] } = useQuery<Service[]>({
     queryKey: ["/api/services"],
@@ -245,12 +249,6 @@ export default function HomeScreen() {
           </GlassCard>
         ))}
       </ScrollView>
-
-      <FloatingMascot 
-        message={mascotMessage}
-        bottomOffset={tabBarHeight + Spacing.lg}
-        onPress={() => setMascotMessage("")}
-      />
     </View>
   );
 }

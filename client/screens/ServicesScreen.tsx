@@ -11,8 +11,8 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
-import { FloatingMascot } from "@/components/FloatingMascot";
 import { FeaturedVideoReel } from "@/components/FeaturedVideoReel";
+import { useMascot } from "@/contexts/MascotContext";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { ServicesStackParamList } from "@/navigation/ServicesStackNavigator";
 
@@ -67,7 +67,11 @@ export default function ServicesScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<NavigationProp>();
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [mascotMessage, setMascotMessage] = useState("Explore our premium detailing services!");
+  const { setMascotMessage } = useMascot();
+
+  React.useEffect(() => {
+    setMascotMessage("Explore our premium detailing services!");
+  }, [setMascotMessage]);
 
   const { data: services = [], isLoading } = useQuery<Service[]>({
     queryKey: ["/api/services"],
@@ -90,10 +94,6 @@ export default function ServicesScreen() {
     setMascotMessage(`Showing ${category?.name.toLowerCase()}...`);
   };
 
-  const handleMascotPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setMascotMessage("Tap a service to see details and book!");
-  };
 
   if (isLoading) {
     return (
@@ -232,12 +232,6 @@ export default function ServicesScreen() {
           })
         )}
       </ScrollView>
-
-      <FloatingMascot 
-        message={mascotMessage}
-        bottomOffset={tabBarHeight + Spacing.lg}
-        onPress={handleMascotPress}
-      />
     </View>
   );
 }

@@ -11,8 +11,8 @@ import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
-import { FloatingMascot } from "@/components/FloatingMascot";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { useMascot } from "@/contexts/MascotContext";
 import { ProfileStackParamList } from "@/navigation/ProfileStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<ProfileStackParamList>;
@@ -93,9 +93,14 @@ export default function ProfileScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<NavigationProp>();
+  const { setMascotMessage } = useMascot();
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [marketingEnabled, setMarketingEnabled] = useState(false);
+
+  React.useEffect(() => {
+    setMascotMessage("Manage your account, vehicles, and preferences.");
+  }, [setMascotMessage]);
   
   // For demo: business owner mode. In production, fetch from auth context/backend
   const isBusinessOwner = true; // TODO: Replace with role check from user auth context
@@ -346,11 +351,6 @@ export default function ProfileScreen() {
           LuxDetailer v1.0.0
         </ThemedText>
       </ScrollView>
-
-      <FloatingMascot 
-        message="Need help with your account?"
-        bottomOffset={tabBarHeight + Spacing.lg}
-      />
     </View>
   );
 }

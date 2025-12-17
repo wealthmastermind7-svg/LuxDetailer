@@ -9,9 +9,11 @@ import { StatusBar } from "expo-status-bar";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { MascotProvider } from "@/contexts/MascotContext";
 
 import RootStackNavigator from "@/navigation/RootStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { MascotDisplay } from "@/components/MascotDisplay";
 import { Colors } from "@/constants/theme";
 
 export default function App() {
@@ -23,28 +25,31 @@ export default function App() {
           <SafeAreaProvider>
             <GestureHandlerRootView style={styles.root}>
               <KeyboardProvider>
-                <NavigationContainer
-                theme={{
-                  dark: true,
-                  colors: {
-                    primary: Colors.dark.accent,
-                    background: Colors.dark.backgroundRoot,
-                    card: Colors.dark.backgroundDefault,
-                    text: Colors.dark.text,
-                    border: Colors.dark.glassBorder,
-                    notification: Colors.dark.accent,
-                  },
-                  fonts: {
-                    regular: { fontFamily: "System", fontWeight: "400" },
-                    medium: { fontFamily: "System", fontWeight: "500" },
-                    bold: { fontFamily: "System", fontWeight: "700" },
-                    heavy: { fontFamily: "System", fontWeight: "900" },
-                  },
-                }}
-                >
-                  <RootStackNavigator />
-                </NavigationContainer>
-                <StatusBar style="light" />
+                <MascotProvider>
+                  <NavigationContainer
+                  theme={{
+                    dark: true,
+                    colors: {
+                      primary: Colors.dark.accent,
+                      background: Colors.dark.backgroundRoot,
+                      card: Colors.dark.backgroundDefault,
+                      text: Colors.dark.text,
+                      border: Colors.dark.glassBorder,
+                      notification: Colors.dark.accent,
+                    },
+                    fonts: {
+                      regular: { fontFamily: "System", fontWeight: "400" },
+                      medium: { fontFamily: "System", fontWeight: "500" },
+                      bold: { fontFamily: "System", fontWeight: "700" },
+                      heavy: { fontFamily: "System", fontWeight: "900" },
+                    },
+                  }}
+                  >
+                    <RootStackNavigator />
+                  </NavigationContainer>
+                  <MascotDisplay bottomOffset={120} />
+                  <StatusBar style="light" />
+                </MascotProvider>
               </KeyboardProvider>
             </GestureHandlerRootView>
           </SafeAreaProvider>
