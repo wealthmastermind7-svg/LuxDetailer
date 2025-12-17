@@ -1,70 +1,29 @@
-import React, { useEffect } from "react";
-import { View, StyleSheet, Platform } from "react-native";
-import { VideoView, useVideoPlayer } from "expo-video";
+import React from "react";
+import { View, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
-import { getApiUrl } from "@/lib/query-client";
-
-const SHOWCASE_VIDEO = "/videos/black_luxury_car_ceramic_coating.mp4";
+import { CinematicHero } from "@/components/CinematicHero";
 
 export function FeaturedVideoReel() {
-  let videoUrl = "";
-  try {
-    const baseUrl = getApiUrl();
-    videoUrl = new URL(SHOWCASE_VIDEO, baseUrl).href;
-  } catch {
-    videoUrl = SHOWCASE_VIDEO;
-  }
-
-  const player = useVideoPlayer(videoUrl, (player) => {
-    player.loop = true;
-    player.muted = true;
-  });
-
-  useEffect(() => {
-    if (!player) return;
-    const timer = setTimeout(() => {
-      try {
-        player.play();
-      } catch (e) {
-        console.log("Featured video playback retry");
-      }
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [player]);
-
   return (
     <View style={styles.container}>
-      {Platform.OS === "web" ? (
-        <video
-          src={videoUrl}
-          style={styles.videoWeb as any}
-          autoPlay
-          loop
-          muted
-          playsInline
-        />
-      ) : (
-        <VideoView
-          style={styles.videoNative}
-          player={player}
-          nativeControls={false}
-          contentFit="cover"
-          pointerEvents="none"
-        />
-      )}
+      <CinematicHero
+        height={320}
+        gradient={["#0D1B2A", "#1A1A1D", "#0D1B2A"]}
+        accentColor="#D4AF37"
+      />
 
       <LinearGradient
-        colors={["transparent", "rgba(0, 0, 0, 0.8)"]}
+        colors={["transparent", "rgba(0, 0, 0, 0.7)"]}
         style={styles.overlay}
       />
 
       <View style={styles.content}>
-        <ThemedText type="h2" style={styles.title}>
-          Teggy's Elite Detailing
+        <ThemedText type="h2" numberOfLines={1} style={styles.title}>
+          Teggy's Elite
         </ThemedText>
-        <ThemedText type="h4" style={styles.subtitle}>
+        <ThemedText type="small" numberOfLines={1} style={styles.subtitle}>
           Professional ceramic coatings & protection
         </ThemedText>
       </View>
@@ -75,25 +34,14 @@ export function FeaturedVideoReel() {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: 420,
+    height: 380,
     borderRadius: BorderRadius.lg,
     overflow: "hidden",
     marginBottom: Spacing.xl,
     backgroundColor: "#1a1a1a",
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: Colors.dark.glassBorder,
   },
-  videoNative: {
-    width: "100%",
-    height: "100%",
-    position: "absolute",
-  },
-  videoWeb: {
-    width: "100%",
-    height: "100%",
-    position: "absolute",
-    objectFit: "cover",
-  } as any,
   overlay: {
     position: "absolute",
     top: 0,
@@ -113,13 +61,11 @@ const styles = StyleSheet.create({
   },
   title: {
     marginBottom: Spacing.xs,
-    fontSize: 28,
-    fontWeight: "700",
     color: Colors.dark.accent,
+    fontWeight: "700",
   },
   subtitle: {
     opacity: 0.8,
-    fontSize: 14,
     fontWeight: "500",
   },
 });

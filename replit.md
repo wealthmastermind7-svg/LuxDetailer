@@ -209,6 +209,24 @@ See `design_guidelines.md` for comprehensive design specifications including:
 
 ## Recent Changes
 
+### December 17, 2025 - Cinematic Hero Experience & Responsive Typography
+- **Complete**: Replaced looping videos with handcrafted cinematic experience
+  - Created CinematicHero component with parallax scrolling effects
+  - Implemented smooth spring animations and interactive moments
+  - Organic gradient backgrounds with layered parallax depth
+  - Interactive center element with glow effects and spring responses
+  - Animated particles trigger on user interaction for tactile feedback
+  - Replaced HomeVideoHero, FeaturedVideoReel, and ServiceVideoHero with cinematic versions
+  - Feels premium and handcrafted vs. generic video playback
+
+- **Complete**: Responsive font sizing system (zero text wrapping)
+  - Created useResponsiveFontSize hook for dynamic font scaling
+  - All text sizes adjust based on screen width (320px-600px range)
+  - ThemedText component now uses responsive sizes automatically
+  - Preset ranges for display, h1-h4, body, small, caption, link, price
+  - Linear interpolation ensures smooth scaling across all screen sizes
+  - No more text wrapping or overflow at any viewport
+
 ### December 12, 2025 - Teggy's Elite Detailing Rebranding & Video Optimization
 - **Complete**: Full app rebranding to Teggy's Elite Detailing
   - Updated app name, slug, and branding throughout
@@ -217,16 +235,6 @@ See `design_guidelines.md` for comprehensive design specifications including:
   - Updated design guidelines with Teggy's brand specifications
   - Updated services catalog to match Teggy's Elite Detailing offerings
   - Header now displays "Teggy's Elite" branding
-
-- **Complete**: Video looping optimization for TestFlight reliability
-  - Implemented proper looping using player.loop = true (Expo best practice)
-  - Added delayed playback start (100ms) to ensure video player readiness
-  - Created CinematicVideoFallback component with light sweep animation for fallback
-  - Created ServiceVideoHero component with video fallback to cinematic effect
-  - Updated HomeVideoHero and FeaturedVideoReel with improved looping
-  - Videos now use H.264 MP4 format (compatible with all iOS/Android devices)
-  - Videos mapped to services: Ceramic Coating, Paint Correction, Interior Detail, etc.
-  - Fallback ensures smooth experience if video fails to load in TestFlight
 
 ### December 11, 2025
 - **Fixed**: Automatic seeding of services and membership plans on server startup
