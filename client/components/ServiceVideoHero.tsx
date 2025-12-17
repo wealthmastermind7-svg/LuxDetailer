@@ -1,5 +1,5 @@
 import React from "react";
-import { CinematicHero } from "@/components/CinematicHero";
+import { CarDetailingCinematic } from "@/components/CarDetailingCinematic";
 
 interface ServiceVideoHeroProps {
   videoPath?: string | null;
@@ -7,18 +7,12 @@ interface ServiceVideoHeroProps {
 }
 
 /**
- * Service-specific cinematic hero with parallax and interactive moments
- * Replaces video-based approach with handcrafted animated experience
+ * Service-specific car detailing cinematic with parallax and interactive moments
+ * Showcases detailing process through animations and visual effects
  */
 export function ServiceVideoHero({
   videoPath,
   height = 280,
 }: ServiceVideoHeroProps) {
-  return (
-    <CinematicHero
-      height={height}
-      gradient={["#0A0E27", "#1A1A2E", "#0A0E27"]}
-      accentColor="#1E90FF"
-    />
-  );
+  return <CarDetailingCinematic height={height} />;
 }

@@ -3,19 +3,15 @@ import { View, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
-import { CinematicHero } from "@/components/CinematicHero";
+import { CarDetailingCinematic } from "@/components/CarDetailingCinematic";
 
 export function FeaturedVideoReel() {
   return (
     <View style={styles.container}>
-      <CinematicHero
-        height={320}
-        gradient={["#0D1B2A", "#1A1A1D", "#0D1B2A"]}
-        accentColor="#D4AF37"
-      />
+      <CarDetailingCinematic height={320} />
 
       <LinearGradient
-        colors={["transparent", "rgba(0, 0, 0, 0.7)"]}
+        colors={["transparent", "rgba(0, 0, 0, 0.6)"]}
         style={styles.overlay}
       />
 
@@ -24,7 +20,7 @@ export function FeaturedVideoReel() {
           Teggy's Elite
         </ThemedText>
         <ThemedText type="small" numberOfLines={1} style={styles.subtitle}>
-          Professional ceramic coatings & protection
+          Premium ceramic coatings
         </ThemedText>
       </View>
     </View>
