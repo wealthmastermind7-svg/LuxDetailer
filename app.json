@@ -5,13 +5,14 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mycustomios",
+    "scheme": "mycustomiosapp",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.mycustomiosapp.app",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "associatedDomains": ["applinks:*.replit.app"]
     },
     "android": {
       "adaptiveIcon": {

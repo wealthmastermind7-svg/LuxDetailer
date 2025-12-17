@@ -6,12 +6,34 @@ import { z } from "zod";
 export const userRoles = {
   USER: "user",
   ADMIN: "admin",
+  BUSINESS_OWNER: "business_owner",
 } as const;
+
+export const businesses = pgTable("businesses", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description"),
+  logoUrl: text("logo_url"),
+  primaryColor: text("primary_color").default("#1E90FF"),
+  secondaryColor: text("secondary_color").default("#D4AF37"),
+  accentColor: text("accent_color").default("#FFFFFF"),
+  contactEmail: text("contact_email"),
+  contactPhone: text("contact_phone"),
+  address: text("address"),
+  website: text("website"),
+  qrCodeUrl: text("qr_code_url"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 export const users = pgTable("users", {
   id: varchar("id")
     .primaryKey()
     .default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id").references(() => businesses.id),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email"),
@@ -38,6 +60,7 @@ export const services = pgTable("services", {
   id: varchar("id")
     .primaryKey()
     .default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id").references(() => businesses.id),
   name: text("name").notNull(),
   description: text("description"),
   category: text("category").notNull(),
@@ -62,6 +85,7 @@ export const bookings = pgTable("bookings", {
   id: varchar("id")
     .primaryKey()
     .default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id").references(() => businesses.id),
   userId: varchar("user_id").references(() => users.id),
   vehicleId: varchar("vehicle_id").references(() => vehicles.id),
   serviceId: varchar("service_id").references(() => services.id),
@@ -104,6 +128,11 @@ export const userMemberships = pgTable("user_memberships", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const insertBusinessSchema = createInsertSchema(businesses).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -125,6 +154,9 @@ export const insertBookingSchema = createInsertSchema(bookings).omit({
   createdAt: true,
   updatedAt: true,
 });
+
+export type InsertBusiness = z.infer<typeof insertBusinessSchema>;
+export type Business = typeof businesses.$inferSelect;
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;

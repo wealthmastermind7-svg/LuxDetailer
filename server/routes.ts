@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "node:http";
 import { storage } from "./storage";
-import { insertBookingSchema, insertVehicleSchema, insertServiceSchema, insertUserSchema, insertUserMembershipSchema } from "@shared/schema";
+import { insertBookingSchema, insertVehicleSchema, insertServiceSchema, insertUserSchema, insertUserMembershipSchema, insertBusinessSchema } from "@shared/schema";
 import { authMiddleware, requireAuth, requireAdmin, rateLimiter, hashPassword, verifyPassword, createSession, deleteSession } from "./auth";
 import { z } from "zod";
 
@@ -98,6 +98,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/me", requireAuth, async (req: Request, res: Response) => {
     res.json({ user: req.user });
+  });
+
+  // =====================
+  // BUSINESSES (Public read by slug, Admin create/update)
+  // =====================
+
+  app.get("/api/businesses", async (req, res) => {
+    try {
+      const businesses = await storage.getBusinesses();
+      res.json(businesses);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch businesses" });
+    }
+  });
+
+  app.get("/api/businesses/:slug", async (req, res) => {
+    try {
+      const business = await storage.getBusinessBySlug(req.params.slug);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+      res.json(business);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch business" });
+    }
+  });
+
+  app.get("/api/businesses/id/:id", async (req, res) => {
+    try {
+      const business = await storage.getBusiness(req.params.id);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+      res.json(business);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch business" });
+    }
+  });
+
+  app.post("/api/businesses", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const parsed = insertBusinessSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid business data", details: parsed.error });
+      }
+      const business = await storage.createBusiness(parsed.data);
+      res.status(201).json(business);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create business" });
+    }
+  });
+
+  app.patch("/api/businesses/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const business = await storage.updateBusiness(req.params.id, req.body);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+      res.json(business);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update business" });
+    }
+  });
+
+  app.get("/api/businesses/:slug/qr", async (req, res) => {
+    try {
+      const business = await storage.getBusinessBySlug(req.params.slug);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+      const deepLink = `mycustomiosapp://business/${business.slug}`;
+      const appStoreUrl = process.env.APP_STORE_URL || "https://apps.apple.com";
+      res.json({
+        business: { id: business.id, name: business.name, slug: business.slug },
+        deepLink,
+        universalLink: `https://${process.env.EXPO_PUBLIC_DOMAIN || "myapp.com"}/b/${business.slug}`,
+        qrData: deepLink,
+        appStoreUrl,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate QR data" });
+    }
   });
 
   // =====================

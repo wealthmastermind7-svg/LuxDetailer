@@ -1,12 +1,15 @@
 import { eq } from "drizzle-orm";
 import { db } from "./db";
 import {
+  businesses,
   users,
   vehicles,
   services,
   bookings,
   membershipPlans,
   userMemberships,
+  type Business,
+  type InsertBusiness,
   type User,
   type InsertUser,
   type Vehicle,
@@ -22,6 +25,12 @@ import {
 } from "@shared/schema";
 
 export interface IStorage {
+  getBusiness(id: string): Promise<Business | undefined>;
+  getBusinessBySlug(slug: string): Promise<Business | undefined>;
+  getBusinesses(): Promise<Business[]>;
+  createBusiness(business: InsertBusiness): Promise<Business>;
+  updateBusiness(id: string, updates: Partial<InsertBusiness>): Promise<Business | undefined>;
+
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
@@ -54,6 +63,30 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  async getBusiness(id: string): Promise<Business | undefined> {
+    const [business] = await db.select().from(businesses).where(eq(businesses.id, id));
+    return business;
+  }
+
+  async getBusinessBySlug(slug: string): Promise<Business | undefined> {
+    const [business] = await db.select().from(businesses).where(eq(businesses.slug, slug));
+    return business;
+  }
+
+  async getBusinesses(): Promise<Business[]> {
+    return db.select().from(businesses).where(eq(businesses.isActive, true));
+  }
+
+  async createBusiness(business: InsertBusiness): Promise<Business> {
+    const [newBusiness] = await db.insert(businesses).values(business).returning();
+    return newBusiness;
+  }
+
+  async updateBusiness(id: string, updates: Partial<InsertBusiness>): Promise<Business | undefined> {
+    const [business] = await db.update(businesses).set(updates).where(eq(businesses.id, id)).returning();
+    return business;
+  }
+
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
