@@ -162,14 +162,9 @@ export function CarDetailingCinematic({
                 end={{ x: 1, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
-              {/* Top LED strip */}
-              <View style={styles.ledStripTop} />
-              {/* Middle LED strip - left diagonal */}
-              <View style={styles.ledStripMiddleLeft} />
-              {/* Middle LED strip - right diagonal */}
-              <View style={styles.ledStripMiddleRight} />
-              {/* Bottom LED strip */}
-              <View style={styles.ledStripBottom} />
+              {/* LED elements */}
+              <View style={styles.ledElement} />
+              <View style={[styles.ledElement, styles.ledElementOffset]} />
             </View>
           </Animated.View>
 
@@ -182,14 +177,9 @@ export function CarDetailingCinematic({
                 end={{ x: 1, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
-              {/* Top LED strip */}
-              <View style={styles.ledStripTop} />
-              {/* Middle LED strip - left diagonal */}
-              <View style={styles.ledStripMiddleLeft} />
-              {/* Middle LED strip - right diagonal */}
-              <View style={styles.ledStripMiddleRight} />
-              {/* Bottom LED strip */}
-              <View style={styles.ledStripBottom} />
+              {/* LED elements */}
+              <View style={styles.ledElement} />
+              <View style={[styles.ledElement, styles.ledElementOffset]} />
             </View>
           </Animated.View>
 
@@ -403,58 +393,22 @@ const styles = StyleSheet.create({
     borderColor: "rgba(100, 100, 100, 0.8)",
   },
 
-  ledStripTop: {
+  ledElement: {
     position: "absolute",
-    width: 48,
-    height: 2,
-    backgroundColor: "rgba(255, 240, 150, 0.85)",
-    top: 3,
-    left: 4,
+    width: 14,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255, 220, 100, 0.8)",
+    left: 8,
+    top: 8,
     shadowColor: "#FFD700",
     shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 3,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
-  ledStripMiddleLeft: {
-    position: "absolute",
-    width: 22,
-    height: 2,
-    backgroundColor: "rgba(255, 240, 150, 0.85)",
-    top: 10,
-    left: 4,
-    transform: [{ rotate: "-25deg" }],
-    shadowColor: "#FFD700",
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 3,
-    elevation: 2,
-  },
-
-  ledStripMiddleRight: {
-    position: "absolute",
-    width: 22,
-    height: 2,
-    backgroundColor: "rgba(255, 240, 150, 0.85)",
-    top: 10,
-    right: 4,
-    transform: [{ rotate: "25deg" }],
-    shadowColor: "#FFD700",
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 3,
-    elevation: 2,
-  },
-
-  ledStripBottom: {
-    position: "absolute",
-    width: 48,
-    height: 2,
-    backgroundColor: "rgba(255, 240, 150, 0.85)",
-    bottom: 3,
-    left: 4,
-    shadowColor: "#FFD700",
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 3,
-    elevation: 2,
+  ledElementOffset: {
+    left: 30,
   },
 
   wheelFrontContainer: {
