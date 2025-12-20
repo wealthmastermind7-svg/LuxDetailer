@@ -10,6 +10,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { MascotProvider } from "@/contexts/MascotContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 import RootStackNavigator, { linkingConfig } from "@/navigation/RootStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -25,7 +26,8 @@ export default function App() {
           <SafeAreaProvider>
             <GestureHandlerRootView style={styles.root}>
               <KeyboardProvider>
-                <MascotProvider>
+                <ThemeProvider>
+                  <MascotProvider>
                   <NavigationContainer
                   linking={linkingConfig}
                   theme={{
@@ -51,6 +53,7 @@ export default function App() {
                   <MascotDisplay bottomOffset={120} />
                   <StatusBar style="light" />
                 </MascotProvider>
+                </ThemeProvider>
               </KeyboardProvider>
             </GestureHandlerRootView>
           </SafeAreaProvider>
