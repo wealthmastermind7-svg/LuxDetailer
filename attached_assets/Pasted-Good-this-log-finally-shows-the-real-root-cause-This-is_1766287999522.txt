@@ -1,0 +1,159 @@
+Good, this log finally shows the **real root cause**. This is now a clean, deterministic fix.
+
+---
+
+## Root Cause (Confirmed)
+
+The build is failing because **React Native Reanimated now requires the New Architecture**, but your build environment is explicitly disabling it.
+
+The critical line is:
+
+```
+[Reanimated] Reanimated requires the New Architecture to be enabled.
+If you have `RCT_NEW_ARCH_ENABLED=0` set in your environment you should remove it.
+```
+
+So what is happening is:
+
+* `react-native-reanimated` is installed (directly or via another library)
+* Expo is generating iOS native code
+* The environment variable `RCT_NEW_ARCH_ENABLED=0` is present
+* Reanimated’s podspec hard-fails when New Architecture is disabled
+* `pod install` aborts, so the archive never even starts
+
+This is **not** a Fastlane issue and **not** an iOS 26 issue. It is purely an architecture flag mismatch.
+
+---
+
+## Why This Suddenly Broke
+
+Recent versions of:
+
+* `react-native-reanimated`
+* Expo SDK (49+)
+* React Native 0.73+
+
+have tightened enforcement around the New Architecture (Fabric + TurboModules).
+
+Previously this produced warnings. Now it produces **hard failures**.
+
+---
+
+## The Correct Fix (Do This Exactly)
+
+### Step 1: Explicitly ENABLE the New Architecture
+
+In your `app.json` or `app.config.ts`, add this:
+
+```json
+{
+  "expo": {
+    "jsEngine": "hermes",
+    "newArchEnabled": true
+  }
+}
+```
+
+This is the **single most important fix**.
+
+---
+
+### Step 2: Remove Any Overrides That Disable It
+
+Search your project for **any** of the following and remove them if present:
+
+* `.env`
+* `.env.production`
+* `eas.json`
+* GitHub Actions
+* Replit secrets
+
+Specifically remove:
+
+```
+RCT_NEW_ARCH_ENABLED=0
+```
+
+If it exists anywhere, Reanimated will fail again.
+
+---
+
+### Step 3: Clean and Regenerate Native Code
+
+Do **not** skip this.
+
+```bash
+rm -rf ios
+rm -rf node_modules
+npm install
+npx expo prebuild --clean
+```
+
+This regenerates the Podfile with New Architecture enabled.
+
+---
+
+### Step 4: Rebuild with Cache Cleared
+
+```bash
+eas build -p ios --clear-cache
+```
+
+At this point:
+
+* `pod install` will succeed
+* Archive will proceed
+* Fastlane will stop failing at gym
+
+---
+
+## Why This Fix Is Safe for Your App
+
+Your app is already compatible because:
+
+* You are using Expo modules
+* You are using Hermes
+* You are using modern navigation and animation libraries
+* Your UI is already Fabric-safe
+
+Enabling New Architecture is now the **default forward path** for Expo apps. You are not taking on technical debt, you are removing it.
+
+---
+
+## Common Follow-Up Questions (Preemptively Answered)
+
+### Do I need to change my JS code?
+
+No.
+
+### Will this affect Android?
+
+No negative impact. Android already defaults closer to the new architecture path.
+
+### Will App Store review be affected?
+
+No. Apple does not see or care about React Native architecture flags.
+
+### Should I downgrade Reanimated instead?
+
+No. Downgrading will cause other Expo modules to break later.
+
+---
+
+## Summary
+
+* The error is real and clearly identified
+* The fix is simple and correct
+* You do **not** need to rebuild the app
+* You do **not** need to touch Fastlane
+* You do **not** need to change signing
+
+Enable New Architecture, clean, rebuild.
+
+If you want, next I can:
+
+* Verify your `eas.json` and `app.config.ts`
+* Confirm no hidden env vars remain
+* Walk you through a minimal production-safe config
+
+Apply the steps above and tell me when you rerun the build.
