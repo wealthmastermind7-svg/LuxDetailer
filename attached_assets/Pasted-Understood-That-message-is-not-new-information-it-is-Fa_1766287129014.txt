@@ -1,0 +1,159 @@
+Understood. That message is **not new information**, it is Fastlane’s generic fallback when **Xcode failed but the real compiler error was hidden**. In other words, Fastlane is telling you “something broke earlier, but I’m not allowed to show it.”
+
+At this point, the only productive action is to **force the real Xcode error to surface** and then fix that specific issue. Below is the shortest, deterministic path to resolution.
+
+---
+
+## Why You Are Stuck in a Loop
+
+* `fastlane gym` wraps `xcodebuild`
+* `suppress_xcode_output = true`
+* Result: **the real error never prints**
+* Fastlane then exits with code `65` and shows the generic message you pasted
+
+Nothing in that message can be fixed directly. It is a symptom, not a cause.
+
+---
+
+## The Only Two Ways Forward (Pick One)
+
+### OPTION A: Reveal the Error via EAS (Recommended)
+
+Run **exactly this**, no changes:
+
+```bash
+eas build -p ios --profile production --clear-cache --verbose
+```
+
+What you are looking for:
+
+* The **first red error line**
+* Usually starts with:
+
+  * `❌ error:`
+  * `SwiftCompile`
+  * `ld: symbol(s) not found`
+  * `Module not found`
+  * `Provisioning profile doesn't include…` (unlikely in your case)
+
+Paste **only the first real error**, not the summary.
+
+---
+
+### OPTION B: Reveal the Error via Xcode (Fastest if you have macOS)
+
+1. Open:
+
+   ```
+   ios/LuxDetailer.xcworkspace
+   ```
+2. Select:
+
+   * Scheme: `LuxDetailer`
+   * Device: `Any iOS Device (arm64)`
+3. Menu:
+
+   ```
+   Product → Archive
+   ```
+4. Xcode will stop and show the **exact file and line** that failed.
+
+This bypasses Fastlane entirely.
+
+---
+
+## While You Do That, Apply These Safe Fixes Now
+
+These address the **most common Expo + iOS archive failures** and often resolve the issue without further debugging.
+
+### 1. Lock iOS Deployment Target (Very Important)
+
+In `app.json` or `app.config.ts`:
+
+```json
+{
+  "expo": {
+    "ios": {
+      "deploymentTarget": "15.0"
+    }
+  }
+}
+```
+
+Reason: Your log shows `iPhoneOS26.0.sdk`. Many Expo pods are not archive-safe yet on iOS 26.
+
+---
+
+### 2. Temporarily Disable Hermes (Diagnostic Step)
+
+```json
+{
+  "expo": {
+    "jsEngine": "jsc"
+  }
+}
+```
+
+If the archive succeeds after this, Hermes is the cause and we re-enable it properly.
+
+---
+
+### 3. Ensure Required iOS Permissions Exist
+
+Because you use video and media:
+
+```json
+{
+  "expo": {
+    "ios": {
+      "infoPlist": {
+        "NSCameraUsageDescription": "Used to capture service content.",
+        "NSPhotoLibraryUsageDescription": "Used to select service media.",
+        "NSPhotoLibraryAddUsageDescription": "Used to save media."
+      }
+    }
+  }
+}
+```
+
+Missing these can cause **archive-only failures**.
+
+---
+
+### 4. Regenerate Native Files Cleanly
+
+```bash
+rm -rf ios
+npx expo prebuild --clean
+eas build -p ios --clear-cache
+```
+
+This removes corrupted Pods and DerivedData.
+
+---
+
+## What Not to Do
+
+* Do not regenerate certificates
+* Do not change bundle ID
+* Do not recreate the app
+* Do not follow Fastlane’s generic guide
+
+Your signing is already correct.
+
+---
+
+## Bottom Line
+
+Right now:
+
+* Fastlane is working
+* EAS is working
+* Signing is working
+* Your app is structurally sound
+
+The build is failing because **Xcode hit a real compiler or linker error that is hidden**.
+
+Once you paste the **actual red error line**, this becomes a precise, one-step fix.
+
+Run Option A or B and send me the real error.

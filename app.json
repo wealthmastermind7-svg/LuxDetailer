@@ -8,11 +8,18 @@
     "scheme": "luxdetailer",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "jsEngine": "jsc",
     "ios": {
       "supportsTablet": true,
+      "deploymentTarget": "15.0",
       "bundleIdentifier": "com.cerolauto.luxdetailer",
       "buildNumber": "1",
-      "associatedDomains": ["applinks:*.replit.app"]
+      "associatedDomains": ["applinks:*.replit.app"],
+      "infoPlist": {
+        "NSCameraUsageDescription": "Used to capture service content.",
+        "NSPhotoLibraryUsageDescription": "Used to select service media.",
+        "NSPhotoLibraryAddUsageDescription": "Used to save media."
+      }
     },
     "android": {
       "adaptiveIcon": {
