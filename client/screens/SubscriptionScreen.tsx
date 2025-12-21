@@ -35,8 +35,6 @@ export default function SubscriptionScreen() {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual" | null>(null);
   const [isSubscribing, setIsSubscribing] = useState(false);
   
-  console.log("[SubscriptionScreen] selectedPlan:", selectedPlan);
-  
   const { 
     isProSubscriber, 
     customerInfo, 
@@ -205,7 +203,6 @@ export default function SubscriptionScreen() {
             <View style={styles.plansContainer}>
               <Pressable
                 onPress={() => {
-                  console.log("[SubscriptionScreen] Monthly card pressed");
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setSelectedPlan("monthly");
                 }}
@@ -234,7 +231,6 @@ export default function SubscriptionScreen() {
 
               <Pressable
                 onPress={() => {
-                  console.log("[SubscriptionScreen] Annual card pressed");
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setSelectedPlan("annual");
                 }}
