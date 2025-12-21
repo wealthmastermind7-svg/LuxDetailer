@@ -1,0 +1,179 @@
+Good, this confirms something very specific and important:
+
+**Your previous Reanimated / New Architecture issue is fixed.
+You are now failing at a *different* stage.**
+
+This is progress.
+
+However, we are again hitting the **same structural problem**:
+👉 **Fastlane is still suppressing the real Xcode error**, so we only see the wrapper failure.
+
+Let me be very precise about what is happening now and how to break the loop.
+
+---
+
+## What We Can Conclude from This Log
+
+### 1. Pods are now installing successfully
+
+You are no longer seeing:
+
+* `Invalid RNReanimated.podspec`
+* `RCT_NEW_ARCH_ENABLED` errors
+* `pod install` failures
+
+That means:
+
+* `newArchEnabled: true` is now active
+* Reanimated is satisfied
+* Native generation succeeded
+
+So **that problem is resolved**.
+
+---
+
+### 2. This is now a **pure Xcode ARCHIVE failure**
+
+Key lines:
+
+```
+▸ ** ARCHIVE FAILED **
+▸ Archiving workspace LuxDetailer with scheme LuxDetailer
+Exit status: 65
+```
+
+No signing errors.
+No provisioning errors.
+No pod errors.
+
+This means **one of these is failing during archive**:
+
+* Swift compilation
+* Objective-C compilation
+* Linker step
+* Native module build step
+
+But Fastlane is hiding it.
+
+---
+
+## Why You Still Can’t See the Error
+
+These two lines are the enemy right now:
+
+```
+suppress_xcode_output | true
+disable_xcpretty      | true
+```
+
+So:
+
+* Xcode prints the real error
+* Fastlane discards it
+* You only see “ARCHIVE FAILED”
+
+Until we disable suppression, **we cannot guess correctly**.
+
+---
+
+## The One Command That Will End This
+
+You must print the archive log file directly.
+
+The log **does exist**. Fastlane told us where it is:
+
+```
+/Users/expo/workingdir/logs/LuxDetailer-LuxDetailer.log
+```
+
+### What to do now
+
+If you are running this locally or via EAS debug shell, run:
+
+```bash
+cat /Users/expo/workingdir/logs/LuxDetailer-LuxDetailer.log
+```
+
+or, if it is large:
+
+```bash
+sed -n '1,200p' /Users/expo/workingdir/logs/LuxDetailer-LuxDetailer.log
+```
+
+You are looking for the **first red error**, usually starting with:
+
+* `error:`
+* `SwiftCompile`
+* `ld:`
+* `clang:`
+* `Undefined symbols for architecture arm64`
+
+Paste **that output**, not the Fastlane summary.
+
+---
+
+## If You Cannot Access That File (EAS Cloud)
+
+Then do **this instead**, which forces logs to print:
+
+```bash
+eas build -p ios --clear-cache --verbose
+```
+
+If that still suppresses output, add this environment variable in `eas.json`:
+
+```json
+{
+  "build": {
+    "production": {
+      "env": {
+        "FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT": "120"
+      }
+    }
+  }
+}
+```
+
+Then rerun the build.
+
+---
+
+## Most Likely Causes at This Stage (Based on Pattern)
+
+Once Reanimated + New Arch is fixed, **these are the usual archive killers**:
+
+1. **iOS 26 SDK incompatibility**
+
+   * A native dependency not ready for iOS 26
+2. **expo-video / AVFoundation symbol issue**
+3. **Missing Info.plist permission**
+
+   * Causes archive-only failure
+4. **Linker error from a native module**
+
+   * Works in Debug, fails in Archive
+
+But I will **not guess** until we see the real compiler error.
+
+---
+
+## Very Important Reassurance
+
+You are not:
+
+* Misconfiguring Expo
+* Using the wrong Apple app
+* Breaking white-label logic
+* Failing signing
+
+You are now in the **final 5 percent** of iOS build debugging.
+
+Once we see the actual error line, this will be a **single, targeted fix**.
+
+---
+
+### Next step (do not skip):
+
+👉 Paste the contents of `LuxDetailer-LuxDetailer.log` or the first real `error:` line from a verbose build.
+
+Once you do that, we finish this.
