@@ -96,9 +96,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedToken = await getStoredToken();
         const storedUser = await getStoredUser();
         if (storedToken && storedUser) {
-          setToken(storedToken);
-          setUser(storedUser);
-          globalToken = storedToken;
+          // Validate the token is still valid on the server
+          const baseUrl = getApiUrl();
+          const url = new URL("/api/auth/me", baseUrl);
+          const res = await fetch(url, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${storedToken}` },
+          });
+          
+          if (res.ok) {
+            setToken(storedToken);
+            setUser(storedUser);
+            globalToken = storedToken;
+          } else {
+            // Token is invalid, clear it
+            console.log("[AuthContext] Stored token is invalid, clearing");
+            await removeStoredToken();
+            await removeStoredUser();
+          }
         }
       } catch (error) {
         console.error("Failed to load stored auth:", error);
