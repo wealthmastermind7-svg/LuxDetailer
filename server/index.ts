@@ -240,8 +240,9 @@ function setupErrorHandler(app: express.Application) {
 
     setupErrorHandler(app);
 
-    // Seed services and membership plans before starting server
-    await seedServices();
+    // Seed data before starting server (order matters: business first, then services)
+    const businessId = await seedBusiness();
+    await seedServices(businessId);
     await seedMembershipPlans();
 
     const port = parseInt(process.env.PORT || "5000", 10);
@@ -261,7 +262,36 @@ function setupErrorHandler(app: express.Application) {
   }
 })();
 
-async function seedServices() {
+async function seedBusiness(): Promise<string | null> {
+  try {
+    const { storage } = await import("./storage");
+    const existingBusinesses = await storage.getBusinesses();
+    
+    if (existingBusinesses.length === 0) {
+      const business = await storage.createBusiness({
+        slug: "gleam-detail",
+        name: "Gleam Mobile Detailing",
+        description: "Premium mobile car detailing services. We bring luxury to your driveway.",
+        primaryColor: "#1E90FF",
+        secondaryColor: "#D4AF37",
+        accentColor: "#FFFFFF",
+        contactEmail: "info@gleam-detail.com",
+        contactPhone: "(555) 123-4567",
+        address: "123 Main Street, Los Angeles, CA 90001",
+        website: "https://gleam-detail.com",
+        isActive: true,
+      });
+      log("Default business seeded successfully");
+      return business.id;
+    }
+    return existingBusinesses[0].id;
+  } catch (error) {
+    console.error("Error seeding business:", error);
+    return null;
+  }
+}
+
+async function seedServices(businessId: string | null) {
   try {
     const { storage } = await import("./storage");
     const existingServices = await storage.getServices();
@@ -361,7 +391,10 @@ async function seedServices() {
       ];
 
       for (const service of defaultServices) {
-        await storage.createService(service);
+        await storage.createService({
+          ...service,
+          businessId: businessId || undefined,
+        });
       }
       
       log("Services seeded successfully");
