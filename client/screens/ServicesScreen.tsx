@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
 import { FeaturedVideoReel } from "@/components/FeaturedVideoReel";
+import { PremiumVideoMontage } from "@/components/PremiumVideoMontage";
 import { useMascot } from "@/contexts/MascotContext";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { ServicesStackParamList } from "@/navigation/ServicesStackNavigator";
@@ -122,6 +123,8 @@ export default function ServicesScreen() {
         showsVerticalScrollIndicator={false}
       >
         <FeaturedVideoReel />
+
+        <PremiumVideoMontage />
         
         <ThemedText type="h2" style={styles.sectionTitle}>
           Our Services
