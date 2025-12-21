@@ -19,7 +19,7 @@
       "ios": {
         "resourceClass": "m-medium",
         "buildConfiguration": "Release",
-        "xcodeVersion": "15.4"
+        "image": "macos-sonoma-14.6-xcode-16.1"
       }
     },
     "production": {
@@ -30,7 +30,7 @@
       "ios": {
         "resourceClass": "m-medium",
         "buildConfiguration": "Release",
-        "xcodeVersion": "15.4"
+        "image": "macos-sonoma-14.6-xcode-16.1"
       }
     }
   },
