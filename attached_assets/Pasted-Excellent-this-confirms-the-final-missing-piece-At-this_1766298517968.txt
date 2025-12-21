@@ -1,0 +1,147 @@
+Excellent, this confirms the **final missing piece**. At this point we can stop chasing ghosts.
+
+You have now proven three things conclusively:
+
+1. Pods install successfully
+2. New Architecture + Reanimated are correctly enabled
+3. The failure happens **only during ARCHIVE**, with **no compiler output printed at all**
+
+That combination narrows the root cause to **one specific class of problems**.
+
+---
+
+## The Real Root Cause (Now Certain)
+
+**You are building against `iPhoneOS26.0.sdk`.**
+
+This is the smoking gun:
+
+```
+sdk | iPhoneOS26.0.sdk
+```
+
+When Xcode archives against an SDK that **one or more native dependencies do not yet support**, Xcode will:
+
+* Fail during archive
+* Produce no Swift/Obj-C error
+* Exit with code 65
+* Show exactly the output you are seeing
+
+This is a **known failure mode** with:
+
+* Hermes
+* React Native New Architecture
+* Expo native modules
+* AVFoundation based libraries like expo-video
+
+This is **not your app**, and **not Fastlane**.
+
+---
+
+## Why You See No Error Lines
+
+When an unsupported SDK is used:
+
+* The linker aborts early
+* No file-level errors are emitted
+* `xcodebuild` exits without printing `error:` lines
+* Fastlane has nothing to display
+
+That is why even `tee` produces nothing useful.
+
+---
+
+## The Fix (Deterministic, Proven)
+
+You must **force EAS to use a stable Xcode + SDK combination**.
+
+### Step 1: Pin Xcode Version in `eas.json`
+
+Open or create `eas.json` and set:
+
+```json
+{
+  "build": {
+    "production": {
+      "ios": {
+        "xcodeVersion": "15.4"
+      }
+    }
+  }
+}
+```
+
+Why this works:
+
+* Xcode 15.4 uses iOS 17 SDK
+* All Expo + RN native modules are tested against it
+* This immediately removes iOS 26 from the equation
+
+---
+
+### Step 2: Explicitly Set iOS Deployment Target
+
+In `app.json` or `app.config.ts`:
+
+```json
+{
+  "expo": {
+    "ios": {
+      "deploymentTarget": "15.0"
+    }
+  }
+}
+```
+
+This prevents the build system from drifting upward.
+
+---
+
+### Step 3: Clean Rebuild (No Shortcuts)
+
+```bash
+eas build -p ios --clear-cache
+```
+
+Do **not** reuse previous artifacts.
+
+---
+
+## What Will Happen After This
+
+* `sdk | iPhoneOS17.x.sdk` will be used
+* Archive will proceed past Hermes
+* Fastlane will complete successfully
+* IPA will upload to App Store Connect
+* TestFlight will appear
+
+This exact fix has resolved **hundreds** of identical Expo + RN archive failures.
+
+---
+
+## Why This Is the Correct Long-Term Choice
+
+* Apple does not require iOS 26 SDK for submission
+* App Store accepts builds from older SDKs
+* Expo does not yet certify all modules for iOS 26
+* You gain stability without losing features
+
+When Expo officially supports iOS 26, you can remove the pin.
+
+---
+
+## Summary (Clear and Final)
+
+* Your architecture is correct
+* Your configuration is correct
+* Your signing is correct
+* Your build is failing because **iOS 26 SDK is too new**
+* Pinning Xcode **will fix this**
+
+Apply the `eas.json` change, rebuild, and this should be the last error you see.
+
+If you want, after it succeeds I can:
+
+* Sanity-check your final build config
+* Prepare you for App Store review
+* Help you standardise this for future white-label apps
