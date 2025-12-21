@@ -54,4 +54,5 @@ ensurePreviewReachable = "/status"
 
 [userenv.shared]
 REVENUECAT_API_KEY = "test_GzykgEFUTKmovzjSmkZmpkWGNXf"
+EXPO_PUBLIC_REVENUECAT_API_KEY = "test_GzykgEFUTKmovzjSmkZmpkWGNXf"
 

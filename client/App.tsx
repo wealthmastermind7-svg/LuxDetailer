@@ -11,6 +11,7 @@ import { queryClient } from "@/lib/query-client";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { MascotProvider } from "@/contexts/MascotContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { RevenueCatProvider } from "@/contexts/RevenueCatContext";
 
 import RootStackNavigator, { linkingConfig } from "@/navigation/RootStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -23,11 +24,12 @@ export default function App() {
     <ErrorBoundary>
       <AuthProvider>
         <QueryClientProvider client={queryClient}>
-          <SafeAreaProvider>
-            <GestureHandlerRootView style={styles.root}>
-              <KeyboardProvider>
-                <ThemeProvider>
-                  <MascotProvider>
+          <RevenueCatProvider>
+            <SafeAreaProvider>
+              <GestureHandlerRootView style={styles.root}>
+                <KeyboardProvider>
+                  <ThemeProvider>
+                    <MascotProvider>
                   <NavigationContainer
                   linking={linkingConfig}
                   theme={{
@@ -50,13 +52,14 @@ export default function App() {
                   >
                     <RootStackNavigator />
                   </NavigationContainer>
-                  <MascotDisplay bottomOffset={120} />
-                  <StatusBar style="light" />
-                </MascotProvider>
-                </ThemeProvider>
-              </KeyboardProvider>
-            </GestureHandlerRootView>
-          </SafeAreaProvider>
+                    <MascotDisplay bottomOffset={120} />
+                    <StatusBar style="light" />
+                  </MascotProvider>
+                  </ThemeProvider>
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </SafeAreaProvider>
+          </RevenueCatProvider>
         </QueryClientProvider>
       </AuthProvider>
     </ErrorBoundary>

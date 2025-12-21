@@ -291,19 +291,31 @@ export default function ProfileScreen() {
           />
         </GlassCard>
 
-        {isBusinessOwner && (
+        {isBusinessOwner ? (
           <GlassCard style={styles.menuSection}>
             <ThemedText type="caption" style={styles.menuSectionTitle}>
               BUSINESS
             </ThemedText>
+            <MenuItem 
+              icon="briefcase" 
+              label="Business Dashboard" 
+              value="Analytics, customers & more"
+              onPress={() => navigation.navigate("BusinessDashboard")}
+            />
             <MenuItem 
               icon="list" 
               label="All Bookings" 
               value="View all customer bookings"
               onPress={() => navigation.navigate("AllBookings")}
             />
+            <MenuItem 
+              icon="credit-card" 
+              label="Subscription" 
+              value="Manage your Pro subscription"
+              onPress={() => navigation.navigate("Subscription")}
+            />
           </GlassCard>
-        )}
+        ) : null}
 
         <GlassCard style={styles.menuSection}>
           <ThemedText type="caption" style={styles.menuSectionTitle}>

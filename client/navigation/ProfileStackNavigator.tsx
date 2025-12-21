@@ -8,6 +8,8 @@ import PrivacyScreen from "@/screens/PrivacyScreen";
 import TermsScreen from "@/screens/TermsScreen";
 import ChangePasswordScreen from "@/screens/ChangePasswordScreen";
 import AllBookingsScreen from "@/screens/AllBookingsScreen";
+import BusinessDashboardScreen from "@/screens/BusinessDashboardScreen";
+import SubscriptionScreen from "@/screens/SubscriptionScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { Colors } from "@/constants/theme";
 
@@ -20,6 +22,8 @@ export type ProfileStackParamList = {
   Terms: undefined;
   ChangePassword: undefined;
   AllBookings: undefined;
+  BusinessDashboard: undefined;
+  Subscription: undefined;
 };
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
@@ -76,6 +80,16 @@ export default function ProfileStackNavigator() {
         name="AllBookings"
         component={AllBookingsScreen}
         options={{ headerTitle: "All Bookings" }}
+      />
+      <Stack.Screen
+        name="BusinessDashboard"
+        component={BusinessDashboardScreen}
+        options={{ headerTitle: "Business Dashboard" }}
+      />
+      <Stack.Screen
+        name="Subscription"
+        component={SubscriptionScreen}
+        options={{ headerTitle: "Subscription" }}
       />
     </Stack.Navigator>
   );
