@@ -12,7 +12,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ThemedText } from "@/components/ThemedText";
 import { GlassCard } from "@/components/GlassCard";
 import { HeaderTitle } from "@/components/HeaderTitle";
-import { HomeVideoHero } from "@/components/HomeVideoHero";
 import { PremiumVideoMontage } from "@/components/PremiumVideoMontage";
 import { Colors, Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
@@ -134,8 +133,6 @@ export default function HomeScreen() {
             <Feather name="bell" size={24} color={Colors.dark.text} />
           </Pressable>
         </View>
-
-        <HomeVideoHero onPress={handleBookNow} />
 
         <PremiumVideoMontage />
 
