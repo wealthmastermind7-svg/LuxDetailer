@@ -242,7 +242,7 @@ export default function BusinessDashboardScreen() {
           <ActionButton
             icon="bar-chart-2"
             label="Analytics & Reports"
-            onPress={() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)}
+            onPress={() => navigation.navigate("Analytics")}
           />
           <ActionButton
             icon="settings"

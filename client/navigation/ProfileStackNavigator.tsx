@@ -10,6 +10,7 @@ import ChangePasswordScreen from "@/screens/ChangePasswordScreen";
 import AllBookingsScreen from "@/screens/AllBookingsScreen";
 import BusinessDashboardScreen from "@/screens/BusinessDashboardScreen";
 import SubscriptionScreen from "@/screens/SubscriptionScreen";
+import AnalyticsScreen from "@/screens/AnalyticsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { Colors } from "@/constants/theme";
 
@@ -24,6 +25,7 @@ export type ProfileStackParamList = {
   AllBookings: undefined;
   BusinessDashboard: undefined;
   Subscription: undefined;
+  Analytics: undefined;
 };
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
@@ -90,6 +92,11 @@ export default function ProfileStackNavigator() {
         name="Subscription"
         component={SubscriptionScreen}
         options={{ headerTitle: "Subscription" }}
+      />
+      <Stack.Screen
+        name="Analytics"
+        component={AnalyticsScreen}
+        options={{ headerTitle: "Analytics" }}
       />
     </Stack.Navigator>
   );
