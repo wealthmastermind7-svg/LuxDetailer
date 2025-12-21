@@ -35,6 +35,7 @@ export function PremiumVideoMontage() {
           loop
           muted
           playsInline
+          src={require("../../assets/videos/premium_showcase.mp4") as any}
         />
       ) : (
         <VideoView
