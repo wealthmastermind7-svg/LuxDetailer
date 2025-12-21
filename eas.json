@@ -13,14 +13,22 @@
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "RCT_NEW_ARCH_ENABLED": "1"
+      },
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "buildConfiguration": "Release"
       }
     },
     "production": {
       "autoIncrement": true,
+      "env": {
+        "RCT_NEW_ARCH_ENABLED": "1"
+      },
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "buildConfiguration": "Release"
       }
     }
   },

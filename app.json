@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "luxdetailer",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "jsEngine": "jsc",
     "ios": {
       "supportsTablet": true,
