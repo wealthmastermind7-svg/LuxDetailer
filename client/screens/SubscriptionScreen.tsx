@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -32,6 +32,9 @@ function FeatureRow({ icon, text }: FeatureRowProps) {
 export default function SubscriptionScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual" | null>(null);
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  
   const { 
     isProSubscriber, 
     customerInfo, 
@@ -44,16 +47,25 @@ export default function SubscriptionScreen() {
     presentCustomerCenter,
   } = useRevenueCat();
 
-  const handleSubscribe = async (packageType: "monthly" | "annual") => {
+  const handleSelectPlan = (plan: "monthly" | "annual") => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedPlan(plan);
+  };
+
+  const handleSubscribe = async () => {
+    if (!selectedPlan) return;
+    
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsSubscribing(true);
     
     if (!isRevenueCatConfigured) {
       presentPaywall();
+      setIsSubscribing(false);
       return;
     }
 
     const pkg = currentOffering?.availablePackages.find(
-      p => p.identifier === `$rc_${packageType}`
+      p => p.identifier === `$rc_${selectedPlan}`
     );
 
     if (pkg) {
@@ -61,6 +73,7 @@ export default function SubscriptionScreen() {
     } else {
       await presentPaywall();
     }
+    setIsSubscribing(false);
   };
 
   const handleManageSubscription = () => {
@@ -189,12 +202,18 @@ export default function SubscriptionScreen() {
 
             <View style={styles.plansContainer}>
               <Pressable
-                onPress={() => handleSubscribe("monthly")}
+                onPress={() => handleSelectPlan("monthly")}
                 style={({ pressed }) => [
                   styles.planCard,
+                  selectedPlan === "monthly" && styles.planCardSelected,
                   pressed && styles.planCardPressed,
                 ]}
               >
+                {selectedPlan === "monthly" && (
+                  <View style={styles.selectedCheckmark}>
+                    <Feather name="check-circle" size={24} color={Colors.dark.accent} />
+                  </View>
+                )}
                 <ThemedText type="caption" style={styles.planLabel}>
                   MONTHLY
                 </ThemedText>
@@ -207,10 +226,11 @@ export default function SubscriptionScreen() {
               </Pressable>
 
               <Pressable
-                onPress={() => handleSubscribe("annual")}
+                onPress={() => handleSelectPlan("annual")}
                 style={({ pressed }) => [
                   styles.planCard,
                   styles.planCardHighlighted,
+                  selectedPlan === "annual" && styles.planCardSelected,
                   pressed && styles.planCardPressed,
                 ]}
               >
@@ -219,6 +239,11 @@ export default function SubscriptionScreen() {
                     BEST VALUE
                   </ThemedText>
                 </View>
+                {selectedPlan === "annual" && (
+                  <View style={styles.selectedCheckmark}>
+                    <Feather name="check-circle" size={24} color={Colors.dark.accent} />
+                  </View>
+                )}
                 <ThemedText type="caption" style={styles.planLabel}>
                   YEARLY
                 </ThemedText>
@@ -233,6 +258,24 @@ export default function SubscriptionScreen() {
                 </ThemedText>
               </Pressable>
             </View>
+
+            <Pressable
+              onPress={handleSubscribe}
+              disabled={!selectedPlan || isSubscribing}
+              style={({ pressed }) => [
+                styles.subscribeButton,
+                (!selectedPlan || isSubscribing) && styles.subscribeButtonDisabled,
+                pressed && styles.subscribeButtonPressed,
+              ]}
+            >
+              {isSubscribing ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <ThemedText type="body" style={styles.subscribeButtonText}>
+                  Subscribe Now
+                </ThemedText>
+              )}
+            </Pressable>
 
             <Pressable
               onPress={handleRestorePurchases}
@@ -393,9 +436,19 @@ const styles = StyleSheet.create({
     borderColor: Colors.dark.accent,
     borderWidth: 2,
   },
+  planCardSelected: {
+    borderColor: Colors.dark.accent,
+    borderWidth: 2,
+    backgroundColor: `${Colors.dark.accent}10`,
+  },
   planCardPressed: {
     opacity: 0.8,
     transform: [{ scale: 0.98 }],
+  },
+  selectedCheckmark: {
+    position: "absolute",
+    top: Spacing.md,
+    right: Spacing.md,
   },
   bestValueBadge: {
     position: "absolute",
@@ -424,6 +477,27 @@ const styles = StyleSheet.create({
     color: "#34C759",
     marginTop: Spacing.xs,
     fontWeight: "500",
+  },
+  subscribeButton: {
+    backgroundColor: Colors.dark.accent,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xxl,
+    borderRadius: BorderRadius.lg,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+    minHeight: 48,
+  },
+  subscribeButtonDisabled: {
+    opacity: 0.5,
+  },
+  subscribeButtonPressed: {
+    opacity: 0.8,
+  },
+  subscribeButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 16,
   },
   restoreButton: {
     paddingVertical: Spacing.md,
