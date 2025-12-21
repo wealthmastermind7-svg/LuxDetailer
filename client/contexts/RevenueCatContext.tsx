@@ -8,7 +8,7 @@ import Purchases, {
 } from "react-native-purchases";
 import RevenueCatUI, { PAYWALL_RESULT } from "react-native-purchases-ui";
 // Platform-specific API keys
-const REVENUECAT_API_KEY_IOS = "appl_test_GzykgEFUTKmovzjSmkZmpkWGNXf"; // Hardcoded iOS public API key
+const REVENUECAT_API_KEY_IOS = "appl_hqUXYScZfkKuNjVFBoJAQFVVZjk"; // Hardcoded iOS public API key
 const REVENUECAT_API_KEY_ANDROID = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY || "test_GzykgEFUTKmovzjSmkZmpkWGNXf";
 const ENTITLEMENT_ID = "LuxDetailer Pro";
 
