@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MyCustomIOSApp",
-    "slug": "my-custom-ios-app",
+    "name": "LuxDetailer",
+    "slug": "luxdetailer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
