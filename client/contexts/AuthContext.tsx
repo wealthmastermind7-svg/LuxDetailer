@@ -124,11 +124,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const data = await res.json();
+    console.log("[AuthContext.login] Got token:", data.token ? `${data.token.substring(0, 10)}...` : "null");
     await setStoredToken(data.token);
     await setStoredUser(data.user);
     setToken(data.token);
     setUser(data.user);
     globalToken = data.token;
+    console.log("[AuthContext.login] Set globalToken:", globalToken ? `${globalToken.substring(0, 10)}...` : "null");
   }, []);
 
   const register = useCallback(async (username: string, password: string, email?: string, phone?: string) => {

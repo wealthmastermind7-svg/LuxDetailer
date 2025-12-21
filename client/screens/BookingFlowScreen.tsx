@@ -185,6 +185,8 @@ export default function BookingFlowScreen() {
       setLoginUsername("");
       setLoginPassword("");
       if (pendingSubmit) {
+        // Small delay to ensure token is properly set in globalToken
+        await new Promise(resolve => setTimeout(resolve, 100));
         submitBooking();
         setPendingSubmit(false);
       }

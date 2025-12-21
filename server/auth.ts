@@ -101,12 +101,16 @@ export function authMiddleware() {
     
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.slice(7);
+      console.log("[authMiddleware] Found Bearer token:", token.substring(0, 10) + "...");
       req.sessionToken = token;
       
       const user = await getSessionUser(token);
+      console.log("[authMiddleware] getSessionUser returned:", user ? `user: ${user.username}` : "null");
       if (user) {
         req.user = user;
       }
+    } else {
+      console.log("[authMiddleware] No Bearer token in Authorization header");
     }
     
     next();

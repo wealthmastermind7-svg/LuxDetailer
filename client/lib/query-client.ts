@@ -13,6 +13,7 @@ async function throwIfResNotOk(res: Response) {
 
 function getAuthHeaders(): Record<string, string> {
   const token = getAuthToken();
+  console.log("[getAuthHeaders] token:", token ? `${token.substring(0, 10)}...` : "null");
   if (token) {
     return { Authorization: `Bearer ${token}` };
   }
