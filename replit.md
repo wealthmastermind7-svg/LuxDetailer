@@ -53,12 +53,15 @@ client/
     BookingsScreen.tsx             # Booking history timeline view
     VehicleProfileScreen.tsx       # Vehicle management
     MembershipsScreen.tsx          # Membership plans & subscription management
+    BusinessDashboardScreen.tsx    # Business owner dashboard (requires Pro subscription)
+    SubscriptionScreen.tsx         # B2B subscription paywall & management
     SettingsScreen.tsx             # App settings & user preferences
   hooks/
     useScreenOptions.tsx           # Consistent header options hook
     useTheme.tsx                   # Theme hook for dark mode
   contexts/
     AuthContext.tsx                # Authentication state & token management
+    RevenueCatContext.tsx          # Subscription state & purchase management
   lib/
     query-client.ts                # React Query config & API request utility
 
@@ -134,6 +137,22 @@ server/
 - Membership plan management
 - Analytics and reporting (future enhancement)
 - Seed endpoints for initial data population
+
+### B2B Subscriptions (RevenueCat)
+- **LuxDetailer Pro subscription for business owners**
+  - Monthly: $99/month
+  - Annual: $999/year (Save $189)
+- Entitlement: "LuxDetailer Pro"
+- Features gated behind subscription:
+  - Business Dashboard with analytics
+  - Customer management
+  - Advanced booking system
+  - Automated notifications
+  - Priority support
+- RevenueCat SDK integration (react-native-purchases, react-native-purchases-ui)
+- Works in TestFlight/App Store builds (not Expo Go due to native modules)
+- Graceful fallback messaging for Expo Go testing
+- Customer Center for subscription management
 
 ## API Endpoints
 
