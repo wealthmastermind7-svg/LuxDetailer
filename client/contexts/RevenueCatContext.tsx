@@ -7,8 +7,9 @@ import Purchases, {
   PurchasesPackage,
 } from "react-native-purchases";
 import RevenueCatUI, { PAYWALL_RESULT } from "react-native-purchases-ui";
-// Platform-specific API keys from environment
-const REVENUECAT_API_KEY_IOS = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY || "";
+// Platform-specific API keys
+// iOS public API key is safe to embed (RevenueCat public keys are designed for client use)
+const REVENUECAT_API_KEY_IOS = "appl_hqUXYScZfkKuNjVFBoJAQFVVZjk";
 const REVENUECAT_API_KEY_ANDROID = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY || "";
 const ENTITLEMENT_ID = "LuxDetailer Pro";
 
@@ -65,30 +66,33 @@ export function RevenueCatProvider({ children }: RevenueCatProviderProps) {
           return;
         }
 
-        Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
-        console.log(`[RevenueCat] Configuring with ${Platform.OS.toUpperCase()} API key`);
+        if (__DEV__) {
+          Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+          console.log(`[RevenueCat] Configuring with ${Platform.OS.toUpperCase()} API key`);
+          console.log(`[RevenueCat] iOS key being used: ${Platform.OS === "ios" ? apiKey.substring(0, 10) + "..." : "N/A (Android)"}`);
+        }
         
         await Purchases.configure({ apiKey });
         setIsRevenueCatConfigured(true);
-        console.log("[RevenueCat] SDK configured successfully");
+        if (__DEV__) console.log("[RevenueCat] SDK configured successfully");
 
         const info = await Purchases.getCustomerInfo();
         setCustomerInfo(info);
-        console.log("[RevenueCat] Customer info loaded:", info.originalAppUserId);
+        if (__DEV__) console.log("[RevenueCat] Customer info loaded:", info.originalAppUserId);
 
         const offerings = await Purchases.getOfferings();
         if (offerings.current) {
           setCurrentOffering(offerings.current);
-          console.log("[RevenueCat] Current offering:", offerings.current.identifier);
+          if (__DEV__) console.log("[RevenueCat] Current offering:", offerings.current.identifier);
         }
 
         Purchases.addCustomerInfoUpdateListener((info) => {
-          console.log("[RevenueCat] Customer info updated");
+          if (__DEV__) console.log("[RevenueCat] Customer info updated");
           setCustomerInfo(info);
         });
 
       } catch (error) {
-        console.log("[RevenueCat] Initialization error (expected in Expo Go):", error);
+        if (__DEV__) console.log("[RevenueCat] Initialization error (expected in Expo Go):", error);
       } finally {
         setIsLoading(false);
       }

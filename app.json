@@ -5,12 +5,12 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mycustomiosapp",
+    "scheme": "luxdetailer",
     "userInterfaceStyle": "dark",
     "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mycustomiosapp.app",
+      "bundleIdentifier": "com.cerolauto.luxdetailer",
       "buildNumber": "1",
       "associatedDomains": ["applinks:*.replit.app"]
     },
@@ -21,7 +21,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.mycustomiosapp.app",
+      "package": "com.cerolauto.luxdetailer",
       "versionCode": 1
     },
     "web": {

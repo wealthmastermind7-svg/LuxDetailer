@@ -168,7 +168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!business) {
         return res.status(404).json({ error: "Business not found" });
       }
-      const deepLink = `mycustomiosapp://business/${business.slug}`;
+      const deepLink = `luxdetailer://business/${business.slug}`;
       const appStoreUrl = process.env.APP_STORE_URL || "https://apps.apple.com";
       res.json({
         business: { id: business.id, name: business.name, slug: business.slug },

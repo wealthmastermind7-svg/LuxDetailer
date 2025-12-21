@@ -13,7 +13,7 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const linkingConfig = {
-  prefixes: ["mycustomiosapp://", "https://myapp.com"],
+  prefixes: ["luxdetailer://", "https://myapp.com"],
   config: {
     screens: {
       BusinessProfile: "business/:slug",
