@@ -4,20 +4,12 @@ import { VideoView, useVideoPlayer } from "expo-video";
 import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
-import { getApiUrl } from "@/lib/query-client";
 
-const PREMIUM_SHOWCASE_VIDEO = "/videos/premium_car_showcase_montage.mp4";
+// Hardcoded local video source - bundled with app
+const PREMIUM_SHOWCASE_VIDEO = require("../../assets/videos/premium_showcase.mp4");
 
 export function PremiumVideoMontage() {
-  let videoUrl = "";
-  try {
-    const baseUrl = getApiUrl();
-    videoUrl = new URL(PREMIUM_SHOWCASE_VIDEO, baseUrl).href;
-  } catch {
-    videoUrl = PREMIUM_SHOWCASE_VIDEO;
-  }
-
-  const player = useVideoPlayer(videoUrl, (player) => {
+  const player = useVideoPlayer(PREMIUM_SHOWCASE_VIDEO, (player) => {
     player.loop = true;
     player.muted = true;
   });
@@ -37,7 +29,6 @@ export function PremiumVideoMontage() {
     <View style={styles.container}>
       {Platform.OS === "web" ? (
         <video
-          src={videoUrl}
           style={styles.videoWeb as any}
           autoPlay
           loop
