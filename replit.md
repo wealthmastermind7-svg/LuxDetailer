@@ -45,6 +45,14 @@ Teggy's Elite Detailing is a premium mobile car detailing application built with
     - Automatic seeding of services and membership plans
     - Protected endpoints for admin functionalities
 
+## iOS Build Configuration
+- **newArchEnabled**: false (stable, proven configuration)
+- **jsEngine**: "jsc" (avoids Hermes compatibility issues)
+- **deploymentTarget**: 15.0 (ensures pod compatibility)
+- **Deep-link scheme**: luxdetailer:// (matches bundle identifier com.cerolauto.luxdetailer)
+- **iOS permissions**: Camera, photo library access configured in infoPlist
+- **RevenueCat iOS key**: appl_hqUXYScZfkKuNjVFBoJAQFVVZjk (hardcoded for client-side use)
+
 ## External Dependencies
 - **React Query**: For server state management.
 - **React Native Reanimated 3**: For fluid animations.
