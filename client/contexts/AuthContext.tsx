@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
-import { getApiUrl } from "@/lib/query-client";
+import { getApiUrl } from "@/lib/api-url";
 
 interface User {
   id: string;
