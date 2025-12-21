@@ -5,7 +5,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
-// Hardcoded local video source - bundled with app
+// Hardcoded local video source - luxury car detailing showcase
+// Bundled with app for reliable TestFlight and App Store deployment
 const PREMIUM_SHOWCASE_VIDEO = require("../../assets/videos/premium_showcase.mp4");
 
 export function PremiumVideoMontage() {
