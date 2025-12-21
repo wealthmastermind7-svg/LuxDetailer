@@ -7,7 +7,9 @@ import Purchases, {
   PurchasesPackage,
 } from "react-native-purchases";
 import RevenueCatUI, { PAYWALL_RESULT } from "react-native-purchases-ui";
-const REVENUECAT_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY || "test_GzykgEFUTKmovzjSmkZmpkWGNXf";
+// Platform-specific API keys
+const REVENUECAT_API_KEY_IOS = "appl_test_GzykgEFUTKmovzjSmkZmpkWGNXf"; // Hardcoded iOS public API key
+const REVENUECAT_API_KEY_ANDROID = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY || "test_GzykgEFUTKmovzjSmkZmpkWGNXf";
 const ENTITLEMENT_ID = "LuxDetailer Pro";
 
 interface RevenueCatContextType {
@@ -56,7 +58,11 @@ export function RevenueCatProvider({ children }: RevenueCatProviderProps) {
 
         Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
         
-        await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+        // Select API key based on platform
+        const apiKey = Platform.OS === "ios" ? REVENUECAT_API_KEY_IOS : REVENUECAT_API_KEY_ANDROID;
+        console.log(`[RevenueCat] Configuring with ${Platform.OS.toUpperCase()} API key:`, apiKey.substring(0, 20) + "...");
+        
+        await Purchases.configure({ apiKey });
         setIsRevenueCatConfigured(true);
         console.log("[RevenueCat] SDK configured successfully");
 
