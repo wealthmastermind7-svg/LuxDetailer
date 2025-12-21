@@ -15,10 +15,15 @@
       "bundleIdentifier": "com.cerolauto.luxdetailer",
       "buildNumber": "1",
       "associatedDomains": ["applinks:*.replit.app"],
+      "entitlements": {
+        "application-identifier": "com.cerolauto.luxdetailer",
+        "keychain-access-groups": ["$(AppIdentifierPrefix)com.cerolauto.luxdetailer"]
+      },
       "infoPlist": {
         "NSCameraUsageDescription": "Used to capture service content.",
         "NSPhotoLibraryUsageDescription": "Used to select service media.",
-        "NSPhotoLibraryAddUsageDescription": "Used to save media."
+        "NSPhotoLibraryAddUsageDescription": "Used to save media.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
