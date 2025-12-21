@@ -202,9 +202,13 @@ export default function SubscriptionScreen() {
 
             <View style={styles.plansContainer}>
               <Pressable
-                onPress={() => handleSelectPlan("monthly")}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setSelectedPlan("monthly");
+                }}
                 style={({ pressed }) => [
                   styles.planCard,
+                  styles.planCardBorder,
                   selectedPlan === "monthly" && styles.planCardSelected,
                   pressed && styles.planCardPressed,
                 ]}
@@ -226,10 +230,13 @@ export default function SubscriptionScreen() {
               </Pressable>
 
               <Pressable
-                onPress={() => handleSelectPlan("annual")}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setSelectedPlan("annual");
+                }}
                 style={({ pressed }) => [
                   styles.planCard,
-                  styles.planCardHighlighted,
+                  styles.planCardBorder,
                   selectedPlan === "annual" && styles.planCardSelected,
                   pressed && styles.planCardPressed,
                 ]}
@@ -432,9 +439,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.dark.glassBorder,
   },
-  planCardHighlighted: {
-    borderColor: Colors.dark.accent,
-    borderWidth: 2,
+  planCardBorder: {
+    borderWidth: 1,
+    borderColor: Colors.dark.glassBorder,
   },
   planCardSelected: {
     borderColor: Colors.dark.accent,
