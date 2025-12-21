@@ -16,14 +16,16 @@
       "distribution": "internal",
       "ios": {
         "resourceClass": "m-medium",
-        "buildConfiguration": "Release"
+        "buildConfiguration": "Release",
+        "jsEngine": "jsc"
       }
     },
     "production": {
       "autoIncrement": true,
       "ios": {
         "resourceClass": "m-medium",
-        "buildConfiguration": "Release"
+        "buildConfiguration": "Release",
+        "jsEngine": "jsc"
       }
     }
   },
