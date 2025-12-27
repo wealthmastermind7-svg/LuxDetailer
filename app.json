@@ -15,10 +15,6 @@
       "bundleIdentifier": "com.cerolauto.luxdetailer",
       "buildNumber": "1",
       "associatedDomains": ["applinks:*.replit.app"],
-      "entitlements": {
-        "com.apple.developer.storekit": true,
-        "com.apple.developer.in-app-payments": true
-      },
       "infoPlist": {
         "NSCameraUsageDescription": "Used to capture service content.",
         "NSPhotoLibraryUsageDescription": "Used to select service media.",
